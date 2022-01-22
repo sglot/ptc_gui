@@ -1,0 +1,17 @@
+[package]
+name = "ptc_gui"
+version = "0.1.0"
+authors = ["sglot <sg113388@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+magic-crypt = "3.1.7"
+eframe = "*"
+lazy_static = "*"
+confy = "0.4.0"
+serde = {version = "*", features = ["derive"]}
+tracing = "0.1"
+tracing-subscriber = "0.2"

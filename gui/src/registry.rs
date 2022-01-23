@@ -1,7 +1,7 @@
 pub mod registry {
     use std::sync::Mutex;
 
-    use crate::{REGISTRY, config};
+    use crate::{REGISTRY};
     use crate::auth::form::form::LoginFormData;
     use crate::auth::auth::LastUser;
     use crate::config::config::Config;
@@ -17,10 +17,6 @@ pub mod registry {
     impl<'a> Registry {
         pub fn new() -> Self {
             let config = Config::new();
-            // let mut key = config.get_secret_key();
-            // let cryptor = Cryptor { key: &mut key };
-            // let maker = MakerFS::new(config.clone());
-            // let auth = AuthFs::new(cryptor.clone(), maker.clone());
 
             let last_user:LastUser = confy::load_path("./last-users-list.tmp").unwrap_or_default();
             tracing::error!("loaded  {:?}", last_user);
@@ -44,6 +40,10 @@ pub mod registry {
         pub fn set_current_form(form_name: FormName) {
             *REGISTRY.lock().unwrap().current_form.lock().unwrap() = form_name;
         }
+
+        // pub loginFormData() {
+
+        // }
     }
 }
 

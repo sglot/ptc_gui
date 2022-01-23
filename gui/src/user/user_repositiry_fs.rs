@@ -1,8 +1,7 @@
 pub mod user_repositiry_fs {
     use crate::config::config::Config;
     use crate::support::fs::maker::maker_fs::MakerFS;
-    use crate::user::user::User;
-    // use crate::Config;
+    use crate::user::user::user::User;
     use std::fs;
 
     pub struct UserRepositoryFS<'a> {

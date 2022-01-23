@@ -1,6 +1,6 @@
 pub mod auth_service {
 
-    use crate::{config::config::Config, user::user::User, user_repositiry_fs::user_repositiry_fs::UserRepositoryFS, cryptor::cryptor::Cryptor, registry::registry::Registry, support::fs::maker::maker_fs::MakerFS, auth::auth_fs::auth_fs::AuthFs};
+    use crate::{config::config::Config, cryptor::cryptor::Cryptor, registry::registry::Registry, support::fs::maker::maker_fs::MakerFS, auth::auth_fs::auth_fs::AuthFs, user::{user_repositiry_fs::user_repositiry_fs::UserRepositoryFS, user::user::User}};
     pub struct AuthService {
         cryptor: Box<Cryptor>,
         auth: AuthFs
@@ -40,8 +40,22 @@ pub mod auth_service {
             }
         }
 
+        pub fn authenticate(&self, login: String, pass: String) -> Result<String, String> {
+            match self.auth.check_auth(&login, &pass) {
+                Ok(res) => if res {
+                    Ok("Успех".to_string())
+                } else {
+                    return Err("Ошибка".to_string());
+                }
+                Err(e) => Err(e),
+            }
+            
+        }
+
         // pub fn check_auth(login: String, pass: String) -> Result<String, String> {
 
         // }
     }
+
+    
 }

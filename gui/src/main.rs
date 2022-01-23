@@ -11,16 +11,17 @@ pub mod user;
 pub mod support;
 pub mod form;
 
+pub mod resource_list;
 
 use std::sync::Mutex;
 use auth::form::form::GUI;
 use form::form::FormName;
-use crate::{auth::auth::Login, registry::registry::Registry};
-use tracing::info;
+use resource_list::form::resource_list_form::ResourceListForm;
+use crate::{ registry::registry::Registry};
 use tracing_subscriber;
 
 use eframe::{
-    egui::{CentralPanel, ScrollArea, Ui, Vec2},
+    egui::{CentralPanel, Ui, Vec2},
     epi::App,
     run_native, NativeOptions,
 };
@@ -48,7 +49,7 @@ impl App for GUI {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             render_header(ui);
 
-            if (Registry::eq_current_form(FormName::Auth)) {
+            if Registry::eq_current_form(FormName::Auth) {
                 ui.horizontal(|ui: &mut Ui| {
                     ui.group(|ui| {
                         ui.set_max_width(300.0);
@@ -64,10 +65,11 @@ impl App for GUI {
                 });
             }
 
-            if (Registry::eq_current_form(FormName::ResourceList)) {
+            if Registry::eq_current_form(FormName::ResourceList) {
                 ui.horizontal(|ui: &mut Ui| {
-                    ui.button(self.lfd.pass.lock().unwrap());
+                    // ui.button(self.lfd.pass.lock().unwrap());
                     ui.label(self.lfd.pass.lock().unwrap());
+                    GUI::render(ResourceListForm::new(), ui)
                 });
             }
 
@@ -91,7 +93,7 @@ fn main() {
 
 fn render_header(ui: &mut Ui) {
     ui.vertical_centered(|ui| {
-        // todo 
+        //TODO: 
         // if check_auth => show login
         ui.heading("Для начала нужно авторизоваться");
         ui.add_space(50.)

@@ -4,5 +4,9 @@ pub mod form {
         Auth,
         ResourceList,
     }
+
+    pub trait Form {
+        fn render(&self, ui: &mut eframe::egui::Ui);
+    }
 }
 

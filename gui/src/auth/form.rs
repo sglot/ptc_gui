@@ -1,32 +1,41 @@
 pub mod form {
-    
-    use std::{
-        sync::Mutex,
+
+    use std::sync::Mutex;
+
+    use eframe::egui::{
+        self, Button,   CtxRef,  Label, Layout, TopBottomPanel, Ui,
+        //  ScrollArea, Separator, TextBuffer,   Vec2, CentralPanel, Hyperlink, Color32,
     };
 
-    use eframe::{
-        egui::{
-            self, Button, CentralPanel, Color32, CtxRef, Hyperlink, Label, Layout, ScrollArea,
-            Separator, TopBottomPanel, Ui, Vec2, TextBuffer,
+    use crate::{
+        auth::{
+            auth::{LastUser, Login},
+            auth_service::auth_service::{AuthService},
         },
+
+        form::form::{FormName, Form},
+        registry::registry::Registry,
+        REGISTRY,
     };
-
-    use crate::{ REGISTRY, auth::{auth::{Login, LastUser}, auth_service::auth_service::{AuthService, self}}, user::user::User, user_repositiry_fs::user_repositiry_fs::UserRepositoryFS, config::config::Config, cryptor::cryptor::Cryptor, form::form::FormName, registry::registry::Registry};
-
 
     pub const PADDING: f32 = 5.0;
-    const WHITE: Color32 = Color32::from_rgb(255, 255, 255);
+    
 
     pub struct GUI {
         pub lfd: LoginFormData,
     }
 
-    
+impl GUI {
+    pub fn render(form: impl Form, ui: &mut eframe::egui::Ui) {
+        form.render(ui);
+    }
+}
 
     pub struct LoginFormData {
         pub enter_type: Mutex<Login>,
         pub login: Mutex<String>,
         pub pass: Mutex<String>,
+        pub error_msg: Mutex<String>,
     }
 
     impl LoginFormData {
@@ -35,16 +44,29 @@ pub mod form {
                 enter_type: Mutex::new(Login::Login),
                 login: Mutex::new("".to_string()),
                 pass: Mutex::new("".to_string()),
+                error_msg: Mutex::new("".to_string()),
             }
+        }
+
+        pub fn enter_type_eq(&self, enter_type: Login) -> bool {
+            *self.enter_type.lock().unwrap() == enter_type
+        }
+
+        pub fn set_enter_type(&self, enter_type: Login) {
+            *self.enter_type.lock().unwrap() = enter_type
+        }
+
+        pub fn error_msg(&self) -> String {
+            self.error_msg.lock().unwrap().clone()
+        }
+
+        pub fn set_error_msg(&self, err: String) {
+            *self.error_msg.lock().unwrap() = err;
         }
     }
 
     impl GUI {
         pub fn new() -> GUI {
-            // let iter = (0..2).map(|a| User {
-            //     login: format!("{}", a),
-            // });
-
             GUI {
                 lfd: LoginFormData::new(),
             }
@@ -55,26 +77,20 @@ pub mod form {
                 ui.add_space(30.);
 
                 ui.horizontal(|ui: &mut Ui| {
-                    if ui
-                        .selectable_value(
-                            &mut *self.lfd.enter_type.lock().unwrap(),
-                            Login::Login,
-                            "Вход",
-                        )
-                        .clicked()
-                    {
-                        // *self.lfd.enter_type.lock().unwrap() = Login::Login
-                        // *ENTER_PROCEDURE.lock().unwrap() = Login::Login;
-                    }
+                    ui.selectable_value(
+                        &mut *self.lfd.enter_type.lock().unwrap(),
+                        Login::Login,
+                        "Вход",
+                    );
 
-                    if ui
-                        .selectable_value(&mut *self.lfd.enter_type.lock().unwrap(), Login::Register, "Регистрация",)
-                        .clicked()
-                    {
-                        // *ENTER_PROCEDURE.lock().unwrap() = Login::Register;
-                    }
+                    ui.selectable_value(
+                        &mut *self.lfd.enter_type.lock().unwrap(),
+                        Login::Register,
+                        "Регистрация",
+                    );
                 });
 
+                // login field
                 ui.text_edit_singleline(&mut *self.lfd.login.lock().unwrap());
 
                 self.render_users(ui);
@@ -95,18 +111,15 @@ pub mod form {
             //     ui.add(Separator::default());
             // }
 
-
-                ui.add_space(PADDING);
-                // render title
-                let login = format!("▶ выбрать {}", &REGISTRY.lock().unwrap().last_user.login);
-                let last_login_label = ui.button( login);
-                if last_login_label.clicked() {
-                    *self.lfd.login.lock().unwrap() = REGISTRY.lock().unwrap().last_user.login.clone();
-                    tracing::error!("clicked {}", *self.lfd.login.lock().unwrap());
-                }
+            ui.add_space(PADDING);
+            // render title
+            let login = format!("▶ выбрать {}", &REGISTRY.lock().unwrap().last_user.login);
+            let last_login_label = ui.button(login);
+            if last_login_label.clicked() {
+                *self.lfd.login.lock().unwrap() = REGISTRY.lock().unwrap().last_user.login.clone();
+                tracing::error!("clicked {}", *self.lfd.login.lock().unwrap());
+            }
         }
-
-        
 
         pub fn render_buttons(&self, ui: &mut eframe::egui::Ui) {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
@@ -114,6 +127,7 @@ pub mod form {
 
                 ui.text_edit_singleline(&mut *self.lfd.pass.lock().unwrap());
                 if !ui.button("Ввод").clicked() {
+                    ui.label(self.lfd.error_msg());
                     return;
                 }
 
@@ -126,32 +140,49 @@ pub mod form {
                     tracing::error!("Saving error  {}", e);
                 }
 
-                
+                let auth_service = AuthService::new();
 
-                if (Login::Register.eq( &*self.lfd.enter_type.lock().unwrap())) {
-                    tracing::error!("попытка регистрации");
-                    ui.label("попытка регистрации");
+                if self.lfd.enter_type_eq(Login::Login) {
+                    tracing::error!(
+                        "попытка авторизации {:?}",
+                        *self.lfd.enter_type.lock().unwrap()
+                    );
 
-                    let auth_service = AuthService::new();
-                    match auth_service.reg(
-                        self.lfd.login.lock().unwrap().clone(), 
-                        self.lfd.pass.lock().unwrap().clone()
+                    match auth_service.authenticate(
+                        self.lfd.login.lock().unwrap().clone(),
+                        self.lfd.pass.lock().unwrap().clone(),
                     ) {
                         Ok(r) => {
                             Registry::set_current_form(FormName::ResourceList);
                             r
-                        },
+                        }
                         Err(e) => {
-                            tracing::error!("Saving error  {}", e);
+                            self.lfd.set_error_msg(e.clone());
+                            tracing::error!("reg error {}", e);
                             e.to_string()
                         }
                     };
 
-                } else {
-                    tracing::error!("попытка авторизации {:?}", *self.lfd.enter_type.lock().unwrap());
-                    ui.label("попытка авторизации");
-                    Registry::set_current_form(FormName::ResourceList);
+                    return;
                 }
+
+                tracing::error!("попытка регистрации");
+                ui.label("попытка регистрации");
+
+                match auth_service.reg(
+                    self.lfd.login.lock().unwrap().clone(),
+                    self.lfd.pass.lock().unwrap().clone(),
+                ) {
+                    Ok(r) => {
+                        Registry::set_current_form(FormName::ResourceList);
+                        r
+                    }
+                    Err(e) => {
+                        self.lfd.set_error_msg(e.clone());
+                        tracing::error!("reg error {}", e);
+                        e.to_string()
+                    }
+                };
             });
         }
 
@@ -166,10 +197,18 @@ pub mod form {
                     });
                     // controls
                     ui.with_layout(Layout::right_to_left(), |ui| {
-                        let close_btn = ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+                        let _close_btn =
+                            ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+
                         let refresh_btn =
                             ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
-                        let theme_btn = ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+
+                        if refresh_btn.clicked() {
+                            Registry::set_current_form(FormName::Auth);
+                        }
+                        
+                        let _theme_btn =
+                            ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
                     });
                 });
                 ui.add_space(10.);

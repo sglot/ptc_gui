@@ -1,23 +1,24 @@
 pub mod auth;
 pub mod bootstrap;
 pub mod registry;
+pub mod registry_repository;
 
 extern crate magic_crypt;
 
 pub mod config;
 pub mod cryptor;
-pub mod user_repositiry_fs;
 pub mod user;
 pub mod support;
 pub mod form;
 
+pub mod resource;
 pub mod resource_list;
 
 use std::sync::Mutex;
-use auth::form::form::GUI;
-use form::form::FormName;
+use auth::form::form::{ AuthForm};
+use form::{form::FormName, main_form::main_form::GUI};
 use resource_list::form::resource_list_form::ResourceListForm;
-use crate::{ registry::registry::Registry};
+use crate::{ registry::registry::Registry, registry_repository::registry_repository::RegistryRepository};
 use tracing_subscriber;
 
 use eframe::{
@@ -31,7 +32,7 @@ use eframe::{
 extern crate lazy_static;
 
 lazy_static! {
-    static ref REGISTRY: Mutex<Registry> = Mutex::new(Registry::new());
+    static ref REGISTRY: Mutex<RegistryRepository> = Mutex::new(RegistryRepository::new());
 }
 
 
@@ -50,25 +51,15 @@ impl App for GUI {
             render_header(ui);
 
             if Registry::eq_current_form(FormName::Auth) {
-                ui.horizontal(|ui: &mut Ui| {
-                    ui.group(|ui| {
-                        ui.set_max_width(300.0);
-                        ui.set_max_height(300.0);
 
-                        self.render_check_user_panel(ui);
-
-                        // ui.set_min_height(10.0);
-                        // ui.set_max_width(20.0);
-                    });
-
-                    self.render_buttons(ui);
-                });
+                GUI::render(AuthForm::new(), ui);
+                
             }
 
             if Registry::eq_current_form(FormName::ResourceList) {
                 ui.horizontal(|ui: &mut Ui| {
                     // ui.button(self.lfd.pass.lock().unwrap());
-                    ui.label(self.lfd.pass.lock().unwrap());
+                    // ui.label(self.lfd.pass.lock().unwrap());
                     GUI::render(ResourceListForm::new(), ui)
                 });
             }

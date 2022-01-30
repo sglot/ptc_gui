@@ -1,6 +1,7 @@
 pub mod form;
 pub mod auth_fs;
 pub mod auth_service;
+pub mod auth_data;
 
 
 pub mod auth {

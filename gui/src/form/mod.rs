@@ -1,3 +1,5 @@
+pub mod main_form;
+
 pub mod form {
     #[derive(PartialEq)]
     pub enum FormName {
@@ -9,4 +11,3 @@ pub mod form {
         fn render(&self, ui: &mut eframe::egui::Ui);
     }
 }
-

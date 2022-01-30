@@ -1,98 +1,59 @@
 pub mod form {
-
-    use std::sync::Mutex;
+    use std::{sync::{Mutex, MutexGuard}, borrow::Borrow};
 
     use eframe::egui::{
-        self, Button,   CtxRef,  Label, Layout, TopBottomPanel, Ui,
+        self,
+        Button,
+        CtxRef,
+        Label,
+        Layout,
+        TopBottomPanel,
+        Ui,
         //  ScrollArea, Separator, TextBuffer,   Vec2, CentralPanel, Hyperlink, Color32,
     };
 
     use crate::{
         auth::{
             auth::{LastUser, Login},
-            auth_service::auth_service::{AuthService},
+            auth_service::auth_service::AuthService, auth_data::auth_data::AuthData,
         },
-
-        form::form::{FormName, Form},
+        form::form::{Form, FormName},
         registry::registry::Registry,
-        REGISTRY,
+        REGISTRY, registry_repository::registry_repository::RegistryRepository,
     };
-
     pub const PADDING: f32 = 5.0;
-    
 
-    pub struct GUI {
-        pub lfd: LoginFormData,
-    }
+    pub struct AuthForm {}
 
-impl GUI {
-    pub fn render(form: impl Form, ui: &mut eframe::egui::Ui) {
-        form.render(ui);
-    }
-}
-
-    pub struct LoginFormData {
-        pub enter_type: Mutex<Login>,
-        pub login: Mutex<String>,
-        pub pass: Mutex<String>,
-        pub error_msg: Mutex<String>,
-    }
-
-    impl LoginFormData {
-        pub fn new() -> Self {
-            Self {
-                enter_type: Mutex::new(Login::Login),
-                login: Mutex::new("".to_string()),
-                pass: Mutex::new("".to_string()),
-                error_msg: Mutex::new("".to_string()),
-            }
-        }
-
-        pub fn enter_type_eq(&self, enter_type: Login) -> bool {
-            *self.enter_type.lock().unwrap() == enter_type
-        }
-
-        pub fn set_enter_type(&self, enter_type: Login) {
-            *self.enter_type.lock().unwrap() = enter_type
-        }
-
-        pub fn error_msg(&self) -> String {
-            self.error_msg.lock().unwrap().clone()
-        }
-
-        pub fn set_error_msg(&self, err: String) {
-            *self.error_msg.lock().unwrap() = err;
-        }
-    }
-
-    impl GUI {
-        pub fn new() -> GUI {
-            GUI {
-                lfd: LoginFormData::new(),
-            }
+    impl AuthForm {
+        pub fn new() -> AuthForm {
+            AuthForm {}
         }
 
         pub fn render_check_user_panel(&self, ui: &mut eframe::egui::Ui) {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 ui.add_space(30.);
-
+                tracing::error!("render_check_user_panel render");
+                // let registry = &REGISTRY.lock().unwrap();
+                // let auth_data = registry.auth_data;
+                tracing::error!("after reg ");
                 ui.horizontal(|ui: &mut Ui| {
                     ui.selectable_value(
-                        &mut *self.lfd.enter_type.lock().unwrap(),
+                        &mut REGISTRY.lock().unwrap().auth_data.enter_type,
                         Login::Login,
                         "Вход",
                     );
 
                     ui.selectable_value(
-                        &mut *self.lfd.enter_type.lock().unwrap(),
+                        &mut REGISTRY.lock().unwrap().auth_data.enter_type,
                         Login::Register,
                         "Регистрация",
                     );
                 });
 
                 // login field
-                ui.text_edit_singleline(&mut *self.lfd.login.lock().unwrap());
-
+                ui.text_edit_singleline(&mut REGISTRY.lock().unwrap().auth_data.login);
+                tracing::error!("after text_edit_singleline ");
                 self.render_users(ui);
             });
         }
@@ -113,27 +74,48 @@ impl GUI {
 
             ui.add_space(PADDING);
             // render title
-            let login = format!("▶ выбрать {}", &REGISTRY.lock().unwrap().last_user.login);
+            // let registry = &REGISTRY.lock().unwrap();
+            //     let auth_data = registry.auth_data;
+
+            let registry = &mut REGISTRY.lock().unwrap();
+            let login = format!("▶ выбрать {}", registry.last_user.login);
+            tracing::error!("last: {:?} ", login);
             let last_login_label = ui.button(login);
             if last_login_label.clicked() {
-                *self.lfd.login.lock().unwrap() = REGISTRY.lock().unwrap().last_user.login.clone();
-                tracing::error!("clicked {}", *self.lfd.login.lock().unwrap());
+                registry.auth_data.login = registry.last_user.login.clone();
+                tracing::error!("clicked {}", registry.auth_data.login);
             }
+            tracing::error!("after render_users ");
+
+            // {
+            //     drop(registry);
+            // };
         }
 
         pub fn render_buttons(&self, ui: &mut eframe::egui::Ui) {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 ui.add_space(50.);
+                tracing::error!("render_buttons");
+                // let registry = &REGISTRY.lock().unwrap();
+                // tracing::error!("render_buttons login");
+                // let auth_data = &registry.auth_data;
+                // tracing::error!("render_buttons 2");
+                // let mut pass = auth_data.pass.lock().unwrap();
+                // tracing::error!("render_buttons 3");
+                // let mut login = auth_data.login;
 
-                ui.text_edit_singleline(&mut *self.lfd.pass.lock().unwrap());
+                tracing::error!("render_buttons login");
+                ui.text_edit_singleline(&mut *REGISTRY.lock().unwrap().auth_data.pass.lock().unwrap());
                 if !ui.button("Ввод").clicked() {
-                    ui.label(self.lfd.error_msg());
+                    tracing::error!("render_buttons 4");
+                    ui.label(REGISTRY.lock().unwrap().auth_data.error_msg());
                     return;
                 }
 
+                tracing::error!("render_buttons 5");
                 // let mut last_users_list = Vec::new();
                 let mut user = LastUser::new();
-                user.login = self.lfd.login.lock().unwrap().clone();
+                user.login = REGISTRY.lock().unwrap().auth_data.login.clone();
                 // last_users_list.push(&user);
                 tracing::error!("Saving error  {:?}", user);
                 if let Err(e) = confy::store_path("./last-users-list.tmp", user) {
@@ -141,23 +123,30 @@ impl GUI {
                 }
 
                 let auth_service = AuthService::new();
+                let login = REGISTRY.lock().unwrap().auth_data.login.clone();
+                let pass = REGISTRY.lock().unwrap().auth_data.pass.lock().unwrap().clone();
 
-                if self.lfd.enter_type_eq(Login::Login) {
+                tracing::error!("render_buttons 6");
+                tracing::error!("enter_type_eq");
+                if REGISTRY.lock().unwrap().auth_data.enter_type_eq(Login::Login) {
                     tracing::error!(
                         "попытка авторизации {:?}",
-                        *self.lfd.enter_type.lock().unwrap()
+                        REGISTRY.lock().unwrap().auth_data.enter_type
                     );
 
+                    
+                    tracing::error!("login login ");
                     match auth_service.authenticate(
-                        self.lfd.login.lock().unwrap().clone(),
-                        self.lfd.pass.lock().unwrap().clone(),
+                        login,
+                    pass,
                     ) {
                         Ok(r) => {
                             Registry::set_current_form(FormName::ResourceList);
                             r
                         }
                         Err(e) => {
-                            self.lfd.set_error_msg(e.clone());
+                            tracing::error!("reg error {}", e);
+                            REGISTRY.lock().unwrap().auth_data.set_error_msg(e.clone());
                             tracing::error!("reg error {}", e);
                             e.to_string()
                         }
@@ -170,48 +159,37 @@ impl GUI {
                 ui.label("попытка регистрации");
 
                 match auth_service.reg(
-                    self.lfd.login.lock().unwrap().clone(),
-                    self.lfd.pass.lock().unwrap().clone(),
+                    login,
+                    pass,
                 ) {
                     Ok(r) => {
                         Registry::set_current_form(FormName::ResourceList);
                         r
                     }
                     Err(e) => {
-                        self.lfd.set_error_msg(e.clone());
+                        REGISTRY.lock().unwrap().auth_data.set_error_msg(e.clone());
                         tracing::error!("reg error {}", e);
                         e.to_string()
                     }
                 };
             });
         }
+    }
 
-        pub(crate) fn render_top_panel(&self, ctx: &CtxRef) {
-            // define a TopBottomPanel widget
-            TopBottomPanel::top("top_panel").show(ctx, |ui| {
-                ui.add_space(10.);
-                egui::menu::bar(ui, |ui| {
-                    // logo
-                    ui.with_layout(Layout::left_to_right(), |ui| {
-                        ui.add(Label::new("📓").text_style(egui::TextStyle::Heading));
-                    });
-                    // controls
-                    ui.with_layout(Layout::right_to_left(), |ui| {
-                        let _close_btn =
-                            ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
+    impl Form for AuthForm {
+        fn render(&self, ui: &mut eframe::egui::Ui) {
+            ui.horizontal(|ui: &mut Ui| {
+                ui.group(|ui| {
+                    ui.set_max_width(300.0);
+                    ui.set_max_height(300.0);
+                    tracing::error!("AuthForm render");
+                    self.render_check_user_panel(ui);
 
-                        let refresh_btn =
-                            ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
-
-                        if refresh_btn.clicked() {
-                            Registry::set_current_form(FormName::Auth);
-                        }
-                        
-                        let _theme_btn =
-                            ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
-                    });
+                    // ui.set_min_height(10.0);
+                    // ui.set_max_width(20.0);
                 });
-                ui.add_space(10.);
+
+                self.render_buttons(ui);
             });
         }
     }

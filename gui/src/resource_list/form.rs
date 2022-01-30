@@ -1,18 +1,34 @@
 pub mod resource_list_form {
-    use eframe::egui::{Color32, Separator};
+    use eframe::egui::{Color32, Separator, self};
 
-    use crate::{form::form::Form};
+    use crate::{form::form::Form, resource_list::resource_list_service::resource_list_service::ResourceListService, REGISTRY};
 
-    pub struct ResourceListForm {}
+    pub struct ResourceListForm {
+        resource_list_service: ResourceListService
+    }
 
     impl ResourceListForm {
         pub fn new() -> ResourceListForm {
-            ResourceListForm {}
+            ResourceListForm {
+                resource_list_service: ResourceListService::new()
+            }
         }
     }
 
     impl Form for ResourceListForm {
         fn render(&self, ui: &mut eframe::egui::Ui) {
+
+            ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                ui.add_space(30.);
+                let login = REGISTRY.lock().unwrap().auth_data.login.clone();
+            
+                match self.resource_list_service.resource_list(&login) {
+                    Ok(line) => ui.colored_label(WHITE, line),
+                    Err(e) => ui.colored_label(WHITE, "Пусто".to_string()),
+                };
+            });
+            
+            ui.add_space(10.);
             ui.set_row_height(10.0);
             ui.set_width(300.0);
             const WHITE: Color32 = Color32::from_rgb(255, 255, 255);

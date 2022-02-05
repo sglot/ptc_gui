@@ -15,8 +15,8 @@ pub mod auth_data {
             tracing::error!("AuthData new");
             Self {
                 enter_type: Login::Login,
-                login: "".to_string(),
-                pass: Mutex::new("".to_string()),
+                login: "t".to_string(),
+                pass: Mutex::new("t".to_string()),
                 error_msg: Mutex::new("".to_string()),
             }
         }

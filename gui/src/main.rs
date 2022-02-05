@@ -13,6 +13,7 @@ pub mod form;
 
 pub mod resource;
 pub mod resource_list;
+pub mod resource_add;
 
 use std::sync::Mutex;
 use auth::form::form::{ AuthForm};

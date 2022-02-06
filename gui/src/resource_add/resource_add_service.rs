@@ -1,5 +1,5 @@
 pub mod resource_add_service {
-    use crate::resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository};
+    use crate::resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, resource::resource::Resource};
 
 
     pub struct ResourceAddService {
@@ -21,11 +21,9 @@ pub mod resource_add_service {
             }
         }
         
-        pub fn resource_add(&self, login: &str) -> Result<String, String> {
-
-            
-
-            match self.resource_repository.get_list(&login) {
+        pub fn resource_add(&self, resource: Resource) -> Result<String, String> {
+            tracing::error!("resource_add");
+            match self.resource_repository.save(resource) {
                 Ok(res) => Ok(res),
                 Err(e) => Err(e),
             }

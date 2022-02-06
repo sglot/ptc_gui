@@ -8,14 +8,9 @@ pub mod auth_service {
 
     impl AuthService {
         pub fn new() -> AuthService {
-            tracing::error!("AuthService new");
-            // let mut key = Registry::config().lock().unwrap().get_secret_key().clone();
             let cryptor = Cryptor { key: Registry::config().get_secret_key() };
-            tracing::error!("AuthService new 1");
             let maker = MakerFS::new(Registry::config());
-            tracing::error!("AuthService new 2");
             let auth = AuthFs::new(cryptor.clone(), maker.clone());
-            tracing::error!("AuthService new 3");
 
             AuthService {
                 cryptor: Box::new(cryptor),

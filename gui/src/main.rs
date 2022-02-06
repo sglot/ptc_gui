@@ -85,9 +85,11 @@ fn main() {
 
 fn render_header(ui: &mut Ui) {
     ui.vertical_centered(|ui| {
-        //TODO: 
-        // if check_auth => show login
-        ui.heading("Для начала нужно авторизоваться");
-        ui.add_space(50.)
+    
+        if Registry::eq_current_form(FormName::Auth) {
+            ui.heading("Для начала нужно авторизоваться");
+            ui.add_space(50.)
+        }
+        
     });
 }

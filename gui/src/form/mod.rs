@@ -1,6 +1,8 @@
 pub mod main_form;
 
 pub mod form {
+    use eframe::egui::CtxRef;
+
     use crate::resource_add::resource_add_form_data::resource_add_form_data::ResourcseAddFormData;
 
     #[derive(PartialEq)]
@@ -22,6 +24,6 @@ pub mod form {
     }
 
     pub trait Form {
-        fn render(&self, ui: &mut eframe::egui::Ui);
+        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef);
     }
 }

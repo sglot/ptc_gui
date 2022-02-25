@@ -22,8 +22,7 @@ pub mod resource_repository_fs {
         ) -> Result<String, String> {
             use std::fs::File;
             use std::io::Write;
-            tracing::error!("save_to_file");
-            // let storage_file_name: &str = "/template.sec";
+
             let mut path = String::from(path_to);
             match fs::create_dir_all(&path) {
                 Ok(it) => it,
@@ -37,7 +36,7 @@ pub mod resource_repository_fs {
             };
             tracing::error!("save_to_file write");
             match write!(output, "{}", data) {
-                Ok(res) => Ok("Шаблон успешно сохранён".to_string()),
+                Ok(_) => Ok("Шаблон успешно сохранён".to_string()),
                 Err(e) => return Err(e.to_string()),
             }
         }
@@ -52,8 +51,7 @@ pub mod resource_repository_fs {
             let res = match Path::new(&path).exists() {
                 true => Err(String::from("Такой ресурс уже существует")),
                 false => {
-                    let mut key = self.config.get_secret_key();
-                    let cryptor = Cryptor { key: key };
+                    let cryptor = Cryptor { key: self.config.get_secret_key() };
                     tracing::error!("save_savee");
                     match self.save_to_file(
                         &path,
@@ -69,6 +67,20 @@ pub mod resource_repository_fs {
             res
         }
 
+        fn delete(&self, resource: Resource) -> Result<String, String> {
+            let path = self
+                .maker
+                .make_template_dir(&resource.login(), &resource.name());
+
+            match Path::new(&path).exists() {
+                true => match fs::remove_dir_all(&path) {
+                    Ok(_) => Ok("Ресурс удалён".to_string()),
+                    Err(e) => Err(e.to_string()),
+                },
+                false => Ok("Ресурс удалён".to_string()),
+            }
+        }
+
         fn get_list(&self, login: &str) -> Result<Vec<String>, String> {
             let templates_path = self.maker.make_user_templates_dir(login);
 
@@ -79,13 +91,16 @@ pub mod resource_repository_fs {
 
             let mut resources = vec![];
             for path in paths {
-                resources.push(path.unwrap()
-                .path()
-                .into_iter()
-                .last()
-                .unwrap()
-                .to_str()
-                .unwrap().to_string());
+                resources.push(
+                    path.unwrap()
+                        .path()
+                        .into_iter()
+                        .last()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .to_string(),
+                );
             }
 
             Ok(resources)
@@ -96,16 +111,19 @@ pub mod resource_repository_fs {
             //     return String::from("Недостаточно прав");
             // }
 
-
             let template_path = self.maker.make_template_path(login, &resource);
 
             let template = match fs::read_to_string(template_path) {
                 Ok(val) => val,
                 Err(_err) => return Err(String::from("не найден указанный ресурс")),
             };
-            
-            Ok(Resource::new(resource.to_string(), template, login.to_string()))
-    }
+
+            Ok(Resource::new(
+                resource.to_string(),
+                template,
+                login.to_string(),
+            ))
+        }
     }
     impl ResourceRepositoryFS {
         pub fn new() -> ResourceRepositoryFS {

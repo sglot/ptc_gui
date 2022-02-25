@@ -25,10 +25,13 @@ pub mod cryptor {
             base64
         }
 
-        pub fn decrypt(&self, data: &str) -> String {
+        pub fn decrypt(&self, data: &str) -> Result<String, String> {
             let mc = new_magic_crypt!(&self.key, 256);
 
-            mc.decrypt_base64_to_string(data).unwrap()
+            match mc.decrypt_base64_to_string(data) {
+                Ok(res) => (Ok(res)),
+                Err(e) => Err(e.to_string()),
+            }
         }
     }
 }

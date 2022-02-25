@@ -7,27 +7,29 @@ extern crate magic_crypt;
 
 pub mod config;
 pub mod cryptor;
-pub mod user;
-pub mod support;
 pub mod form;
+pub mod settings;
+pub mod support;
+pub mod user;
 
 pub mod resource;
-pub mod resource_list;
 pub mod resource_add;
+pub mod resource_list;
 
-use std::sync::Mutex;
-use auth::form::form::{ AuthForm};
+use crate::{
+    registry::registry::Registry, registry_repository::registry_repository::RegistryRepository,
+};
+use auth::form::form::AuthForm;
 use form::{form::FormName, main_form::main_form::GUI};
 use resource_list::form::resource_list_form::ResourceListForm;
-use crate::{ registry::registry::Registry, registry_repository::registry_repository::RegistryRepository};
+use std::sync::Mutex;
 use tracing_subscriber;
 
 use eframe::{
-    egui::{CentralPanel, Ui, Vec2},
+    egui::{self, CentralPanel, Ui, Vec2},
     epi::App,
     run_native, NativeOptions,
 };
-
 
 #[macro_use]
 extern crate lazy_static;
@@ -36,6 +38,39 @@ lazy_static! {
     static ref REGISTRY: Mutex<RegistryRepository> = Mutex::new(RegistryRepository::new());
 }
 
+impl GUI {
+    fn preset(ctx: &eframe::egui::CtxRef, ui: &mut Ui) {
+        let spacing = ui.spacing_mut();
+        spacing.button_padding = Vec2::new(10., 5.);
+        spacing.indent_ends_with_horizontal_line =true;
+        
+
+        let mut fonts = egui::FontDefinitions::default();
+        
+        fonts.font_data.insert("my_font".to_owned(),
+   std::borrow::Cow::Borrowed(include_bytes!("../../JetBrainsMono-Medium.ttf")));
+
+        fonts.family_and_size.insert(
+            egui::TextStyle::Body,
+            (egui::FontFamily::Proportional, 15.0),
+        );
+        fonts.family_and_size.insert(
+            egui::TextStyle::Button,
+            (egui::FontFamily::Proportional, 15.0),
+        );
+        
+        ctx.set_fonts(fonts);
+    }
+
+    fn render_header(ui: &mut Ui) {
+        ui.vertical_centered(|ui| {
+            if Registry::eq_current_form(FormName::Auth) {
+                ui.heading("Для начала нужно авторизоваться");
+                ui.add_space(50.)
+            }
+        });
+    }
+}
 
 impl App for GUI {
     fn setup(
@@ -49,23 +84,17 @@ impl App for GUI {
     fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
         self.render_top_panel(ctx);
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
-            render_header(ui);
+            GUI::preset(ctx, ui);
+
+            GUI::render_header(ui);
 
             if Registry::eq_current_form(FormName::Auth) {
-
-                GUI::render(AuthForm::new(), ui);
-                
+                GUI::render(AuthForm::new(), ui, ctx);
             }
 
             if Registry::eq_current_form(FormName::ResourceList) {
-                ui.horizontal(|ui: &mut Ui| {
-                    // ui.button(self.lfd.pass.lock().unwrap());
-                    // ui.label(self.lfd.pass.lock().unwrap());
-                    GUI::render(ResourceListForm::new(), ui)
-                });
+                ui.horizontal(|ui: &mut Ui| GUI::render(ResourceListForm::new(), ui, ctx));
             }
-
-            // ui.allocate_space(ui.available_size());
         });
     }
 
@@ -78,18 +107,9 @@ fn main() {
 
     let app = GUI::new();
     let mut win_options = NativeOptions::default();
-    win_options.initial_window_size = Some(Vec2::new(640., 480.));
+    win_options.initial_window_size = Some(Vec2::new(740., 580.));
 
     run_native(Box::new(app), win_options);
 }
 
-fn render_header(ui: &mut Ui) {
-    ui.vertical_centered(|ui| {
-    
-        if Registry::eq_current_form(FormName::Auth) {
-            ui.heading("Для начала нужно авторизоваться");
-            ui.add_space(50.)
-        }
-        
-    });
-}
+

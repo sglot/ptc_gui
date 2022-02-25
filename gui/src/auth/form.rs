@@ -88,6 +88,7 @@ pub mod form {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 ui.add_space(TOP_PADDING);
                 ui.add_space(TOP_PADDING);
+                ui.add_space(TOP_PADDING/3.5);
 
                 ui.label("Пароль:");
                 ui.text_edit_singleline(
@@ -167,7 +168,7 @@ pub mod form {
     }
 
     impl Form for AuthForm {
-        fn render(&self, ui: &mut eframe::egui::Ui) {
+        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
             ui.horizontal(|ui: &mut Ui| {
                 ui.group(|ui| {
                     ui.set_max_width(300.0);

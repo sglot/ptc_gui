@@ -16,8 +16,8 @@ pub mod main_form {
     pub struct GUI {}
 
     impl GUI {
-        pub fn render(form: impl Form, ui: &mut eframe::egui::Ui) {
-            form.render(ui);
+        pub fn render(form: impl Form, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
+            form.render(ui, ctx);
         }
     }
 

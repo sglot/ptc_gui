@@ -1,5 +1,5 @@
 pub mod resource_list_service {
-    use crate::{resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, self}, cryptor::cryptor::Cryptor, registry::registry::Registry};
+    use crate::{resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, self, resource::resource::Resource}, cryptor::cryptor::Cryptor, registry::registry::Registry};
 
 
     pub struct ResourceListService {
@@ -30,7 +30,16 @@ pub mod resource_list_service {
         pub fn decrypt_template(&self, template: &str) -> Result<String, String> {
             let cryptor = Cryptor { key: Registry::config().get_secret_key() };
 
-            Ok(cryptor.decrypt(template))
+            cryptor.decrypt(template)
+        }
+
+        pub fn resource_delete(&self, resource: Resource) -> Result<String, String> {
+            tracing::error!("resource_delete");
+            match self.resource_repository.delete(resource) {
+                Ok(res) => Ok(res),
+                Err(e) => Err(e),
+            }
+            
         }
 
     }

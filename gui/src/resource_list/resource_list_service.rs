@@ -20,14 +20,21 @@ pub mod resource_list_service {
             }
         }
 
-        pub fn find_template(&self, login: &str, resource_name: &str) -> Result<String, String> {
+        pub fn find_template_pass(&self, login: &str, resource_name: &str) -> Result<String, String> {
             match self.resource_repository.find(&login, resource_name) {
-                Ok(resource) => Ok(resource.template()),
+                Ok(resource) => Ok(resource.template_password()),
+                Err(e) => Err(e),
+            }
+        }
+
+        pub fn find_resource(&self, login: &str, resource_name: &str) -> Result<Resource, String> {
+            match self.resource_repository.find(&login, resource_name) {
+                Ok(resource) => Ok(resource),
                 Err(e) => Err(e),
             }
         }
         
-        pub fn decrypt_template(&self, template: &str) -> Result<String, String> {
+        pub fn decrypt_template_pass(&self, template: &str) -> Result<String, String> {
             let cryptor = Cryptor { key: Registry::config().get_secret_key() };
 
             cryptor.decrypt(template)

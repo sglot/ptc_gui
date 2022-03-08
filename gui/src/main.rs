@@ -15,6 +15,7 @@ pub mod user;
 pub mod resource;
 pub mod resource_add;
 pub mod resource_list;
+pub mod menu;
 
 use crate::{
     registry::registry::Registry, registry_repository::registry_repository::RegistryRepository,
@@ -47,7 +48,7 @@ impl GUI {
 
         let mut fonts = egui::FontDefinitions::default();
         
-        fonts.font_data.insert("my_font".to_owned(),
+        fonts.font_data.insert("JetBrainsMonoMedium".to_owned(),
    std::borrow::Cow::Borrowed(include_bytes!("../../JetBrainsMono-Medium.ttf")));
 
         fonts.family_and_size.insert(
@@ -107,7 +108,7 @@ fn main() {
 
     let app = GUI::new();
     let mut win_options = NativeOptions::default();
-    win_options.initial_window_size = Some(Vec2::new(740., 580.));
+    win_options.initial_window_size = Some(Vec2::new(800., 580.));
 
     run_native(Box::new(app), win_options);
 }

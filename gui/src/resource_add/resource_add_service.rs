@@ -3,20 +3,12 @@ pub mod resource_add_service {
 
 
     pub struct ResourceAddService {
-        // cryptor: Box<Cryptor>,
-        // maker: MakerFS,
         resource_repository: ResourceRepositoryFS
     }
 
     impl ResourceAddService {
         pub fn new() -> ResourceAddService {
-            // let cryptor = Cryptor { key: Registry::config().get_secret_key() };
-            // let maker = MakerFS::new(Registry::config());
-            // let auth = AuthFs::new(cryptor.clone(), maker.clone());
-
             ResourceAddService {
-                // cryptor: Box::new(cryptor),
-                // maker: maker,
                 resource_repository: ResourceRepositoryFS::new()
             }
         }
@@ -26,8 +18,15 @@ pub mod resource_add_service {
             match self.resource_repository.save(resource) {
                 Ok(res) => Ok(res),
                 Err(e) => Err(e),
-            }
-            
+            } 
+        }
+
+        pub fn resource_update(&self, resource: Resource) -> Result<String, String> {
+            tracing::error!("resource_update");
+            match self.resource_repository.update(resource) {
+                Ok(res) => Ok(res),
+                Err(e) => Err(e),
+            } 
         }
 
     }

@@ -14,7 +14,7 @@ pub mod maker_fs {
 
         pub fn make_user_path(&self, login: &str) -> String {
             let mut path = String::new();
-            let storage_file_name: &str = self.config.get_password_file_name();
+            let storage_file_name: &str = self.config.get_user_password_file_name();
 
             path.push_str(self.config.get_root_path());
             path.push_str("./.ptc/");

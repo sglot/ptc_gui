@@ -10,7 +10,7 @@ pub mod main_form {
 
     use crate::{
         form::form::{Form, FormName},
-        registry::registry::Registry,
+        registry::registry::Registry, settings::settings::COLOR_RED, menu::form::menu_form::MenuForm,
     };
 
     pub struct GUI {}
@@ -30,27 +30,7 @@ pub mod main_form {
             // define a TopBottomPanel widget
             TopBottomPanel::top("top_panel").show(ctx, |ui| {
                 ui.add_space(10.);
-                egui::menu::bar(ui, |ui| {
-                    // logo
-                    ui.with_layout(Layout::left_to_right(), |ui| {
-                        ui.add(Label::new("📓").text_style(egui::TextStyle::Heading));
-                    });
-                    // controls
-                    ui.with_layout(Layout::right_to_left(), |ui| {
-                        let _close_btn =
-                            ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
-
-                        let refresh_btn =
-                            ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
-
-                        if refresh_btn.clicked() {
-                            Registry::set_current_form(FormName::Auth);
-                        }
-
-                        let _theme_btn =
-                            ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
-                    });
-                });
+                GUI::render(MenuForm::new(), ui, ctx);
                 ui.add_space(10.);
             });
         }

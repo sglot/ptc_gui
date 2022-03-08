@@ -4,7 +4,7 @@ pub mod config {
         root_path: String,
         secret_key: String,
         template_file_name: String,
-        password_file_name: String,
+        user_password_file_name: String,
     }
 
     impl Config {
@@ -13,8 +13,8 @@ pub mod config {
             Config {
                 root_path: String::from("./"),
                 secret_key: String::from("standard"),
-                template_file_name: String::from("/template.sec"),
-                password_file_name: String::from("/storage.sec"),
+                template_file_name: String::from("/resource_data.sec"),
+                user_password_file_name: String::from("/storage.sec"),
             }
         }
 
@@ -30,8 +30,8 @@ pub mod config {
             &self.template_file_name
         }
 
-        pub fn get_password_file_name(&self) -> &str {
-            &self.password_file_name
+        pub fn get_user_password_file_name(&self) -> &str {
+            &self.user_password_file_name
         }
     }
 

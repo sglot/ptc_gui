@@ -19,7 +19,7 @@ pub mod user_repositiry_fs {
             let mut path = self.maker.make_user_home_dir(path_to);
 
             fs::create_dir_all(&path)?;
-            path.push_str(self.config.get_password_file_name());
+            path.push_str(self.config.get_user_password_file_name());
 
             use std::fs::File;
             use std::io::Write;

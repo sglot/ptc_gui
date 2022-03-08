@@ -79,42 +79,80 @@ pub mod resource_add_form_facade {
                 .current_resource_name = data;
         }
 
-        pub fn current_template_name() -> String {
+        pub fn current_template_pass() -> String {
             REGISTRY
                 .lock()
                 .unwrap()
                 .form_data
                 .resource_add
-                .current_template_name
+                .current_template_pass
                 .clone()
         }
 
-        pub fn set_current_template_name(data: String) {
+        pub fn set_current_template_pass(data: String) {
             REGISTRY
                 .lock()
                 .unwrap()
                 .form_data
                 .resource_add
-                .current_template_name = data;
+                .current_template_pass = data;
         }
 
-        pub fn new_template_name() -> String {
+        pub fn new_template_pass() -> String {
             REGISTRY
                 .lock()
                 .unwrap()
                 .form_data
                 .resource_add
-                .new_template_name
+                .new_template_pass
                 .clone()
         }
 
-        pub fn set_new_template_name(data: String) {
+        pub fn set_new_template_pass(data: String) {
             REGISTRY
                 .lock()
                 .unwrap()
                 .form_data
                 .resource_add
-                .new_template_name = data;
+                .new_template_pass = data;
+        }
+
+        pub fn current_resource_login() -> String {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .current_resource_login
+                .clone()
+        }
+
+        pub fn set_current_resource_login(data: String) {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .current_resource_login = data;
+        }
+
+        pub fn new_resource_login() -> String {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .new_resource_login
+                .clone()
+        }
+
+        pub fn set_new_resource_login(data: String) {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .new_resource_login = data;
         }
 
         pub fn new_resource_name() -> String {
@@ -153,6 +191,44 @@ pub mod resource_add_form_facade {
                 .form_data
                 .resource_add
                 .show_confirm_delete_window = data;
+        }
+
+        pub fn is_resource_field_changed() -> bool {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .is_resource_field_changed
+                .clone()
+        }
+
+        pub fn set_resource_field_changed(data: bool) {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .is_resource_field_changed = data;
+        }
+
+        pub fn is_show_pass() -> bool {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .is_show_pass
+                .clone()
+        }
+
+        pub fn set_default_show_pass() {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .resource_add
+                .is_show_pass = false;
         }
     }
 }

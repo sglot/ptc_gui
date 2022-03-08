@@ -36,7 +36,7 @@ pub mod resource_repository_fs {
             };
             tracing::error!("save_to_file write");
             match write!(output, "{}", data) {
-                Ok(_) => Ok("Шаблон успешно сохранён".to_string()),
+                Ok(_) => Ok("Ресурс успешно сохранён".to_string()),
                 Err(e) => return Err(e.to_string()),
             }
         }
@@ -46,16 +46,60 @@ pub mod resource_repository_fs {
         fn save(&self, resource: Resource) -> Result<String, String> {
             let path = self
                 .maker
-                .make_template_dir(&resource.login(), &resource.name());
+                .make_template_dir(&resource.user_login(), &resource.name());
 
             let res = match Path::new(&path).exists() {
                 true => Err(String::from("Такой ресурс уже существует")),
                 false => {
                     let cryptor = Cryptor { key: self.config.get_secret_key() };
                     tracing::error!("save_savee");
+
+                    let template_password_crypted = cryptor.crypt(&resource.template_password());
+                    let mut resource_data:Vec<String> = Vec::new();
+                    resource_data.push(template_password_crypted);
+                    resource_data.push(resource.resource_login());
+                    // resource_data.push(resource.master_password());
+
                     match self.save_to_file(
                         &path,
-                        &cryptor.crypt(&resource.template()),
+                        &resource_data.join(";"),
+                        self.config.get_template_file_name(),
+                    ) {
+                        Ok(res) => Ok(res),
+                        Err(e) => Err(e),
+                    }
+                }
+            };
+
+            res
+        }
+
+        fn update(&self, resource: Resource) -> Result<String, String> {
+            let path = self
+                .maker
+                .make_template_dir(&resource.user_login(), &resource.name());
+
+            let res = match Path::new(&path).exists() {
+                false => Err(String::from("Ошибка, такого ресурса не существует")),
+                true => {
+                    let cryptor = Cryptor { key: self.config.get_secret_key() };
+
+                    let template_password_crypted;
+
+                    // проверка на зашифрованный пароль, чтобы не перешифровать его ещё раз
+                    match cryptor.decrypt(&resource.template_password()) {
+                        Ok(_) => template_password_crypted = resource.template_password(),
+                        Err(_) => template_password_crypted = cryptor.crypt(&resource.template_password()),
+                    };
+
+                    let mut resource_data:Vec<String> = Vec::new();
+                    resource_data.push(template_password_crypted);
+                    resource_data.push(resource.resource_login());
+                    // resource_data.push(resource.master_password());
+
+                    match self.save_to_file(
+                        &path,
+                        &resource_data.join(";"),
                         self.config.get_template_file_name(),
                     ) {
                         Ok(res) => Ok(res),
@@ -70,7 +114,7 @@ pub mod resource_repository_fs {
         fn delete(&self, resource: Resource) -> Result<String, String> {
             let path = self
                 .maker
-                .make_template_dir(&resource.login(), &resource.name());
+                .make_template_dir(&resource.user_login(), &resource.name());
 
             match Path::new(&path).exists() {
                 true => match fs::remove_dir_all(&path) {
@@ -88,7 +132,7 @@ pub mod resource_repository_fs {
                 Ok(line) => line,
                 Err(e) => return Err(e.to_string()),
             };
-
+            tracing::error!("чтение файла get_list");
             let mut resources = vec![];
             for path in paths {
                 resources.push(
@@ -106,22 +150,30 @@ pub mod resource_repository_fs {
             Ok(resources)
         }
 
-        fn find(&self, login: &str, resource: &str) -> Result<Resource, String> {
+        fn find(&self, user_login: &str, resource: &str) -> Result<Resource, String> {
+            // TODO: 
+
             // if !auth.check_auth(&login) {
             //     return String::from("Недостаточно прав");
             // }
+            tracing::error!("чтение файла find");
+            let path_to_resource_data = self.maker.make_template_path(user_login, &resource);
 
-            let template_path = self.maker.make_template_path(login, &resource);
-
-            let template = match fs::read_to_string(template_path) {
+            let resource_data = match fs::read_to_string(path_to_resource_data) {
                 Ok(val) => val,
                 Err(_err) => return Err(String::from("не найден указанный ресурс")),
             };
 
+            let resource_data: Vec<&str> = resource_data.split(";").collect();
+            let template_password = resource_data[0].to_string();
+            let login = resource_data[1].to_string();
+            // let master_password = resource_data[2].to_string();
             Ok(Resource::new(
+                template_password,
+                login,
+                // master_password,
                 resource.to_string(),
-                template,
-                login.to_string(),
+                user_login.to_string(),
             ))
         }
     }

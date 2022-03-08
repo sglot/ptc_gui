@@ -21,17 +21,20 @@ pub mod resource_add_form {
             ResourcseAddFormFacade::set_add_error_msg("".to_string());
 
             let new_resource_name = REGISTRY.lock().unwrap().form_data.resource_add.new_resource_name.clone();
-            let new_template_name = REGISTRY.lock().unwrap().form_data.resource_add.new_template_name.clone();
+            let new_template_pass = REGISTRY.lock().unwrap().form_data.resource_add.new_template_pass.clone();
+            let new_resource_login = REGISTRY.lock().unwrap().form_data.resource_add.new_resource_login.clone();
             let login = REGISTRY.lock().unwrap().auth_data.login.clone();
     
     
-            if (new_resource_name.is_empty() || new_template_name.is_empty()) {
-                ResourcseAddFormFacade::set_add_error_msg("Нужно ввести ресурс и пароль".to_string())
+            if (new_resource_name.is_empty() || new_template_pass.is_empty() || new_resource_login.is_empty()) {
+                ResourcseAddFormFacade::set_add_error_msg("Нужно ввести ресурс, пароль, логин".to_string())
             }
     
             let resource = Resource::new(
+                new_template_pass, 
+                new_resource_login, 
+                // "master_p".to_string(), 
                 new_resource_name, 
-                new_template_name,
                 login
             );
     
@@ -58,20 +61,29 @@ pub mod resource_add_form {
 
                     ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
                         ui.set_max_width(200.);
-                        ui.label("Шаблон:");
-                        ui.text_edit_singleline(&mut REGISTRY.lock().unwrap().form_data.resource_add.new_template_name);
+                        ui.label("Логин:");
+                        ui.text_edit_singleline(&mut REGISTRY.lock().unwrap().form_data.resource_add.new_resource_login);
                     });
-                    
-                    tracing::error!("Добавить шаблон");
-                    let add_btn = ui.add(Button::new("Добавить шаблон").text_color(COLOR_GREEN));
+
+                    ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                        ui.set_max_width(200.);
+                        ui.label("Пароль:");
+                        ui.text_edit_singleline(&mut REGISTRY.lock().unwrap().form_data.resource_add.new_template_pass);
+                    });
+
+                    tracing::error!("Добавить пароль");
+                    let add_btn = ui.add(Button::new("Добавить пароль").text_color(COLOR_GREEN));
 
                     if !add_btn.clicked() {
-                        ui.colored_label(COLOR_RED, ResourcseAddFormFacade::btn_add_error_msg());
+                        
                         return;
                     }
 
                     self.click_btn_add(ui)
                 });
+
+                // TODO: переделать в ошибки для каждого поля
+                ui.colored_label(COLOR_RED, ResourcseAddFormFacade::btn_add_error_msg());
             });
 
         }

@@ -1,29 +1,17 @@
 pub mod form {
-    use std::{
-        borrow::Borrow,
-        sync::{Mutex, MutexGuard},
-    };
-
     use eframe::egui::{
         self,
-        Button,
-        CtxRef,
-        Label,
-        Layout,
-        TopBottomPanel,
-        Ui,
+        Ui, Context,
         //  ScrollArea, Separator, TextBuffer,   Vec2, CentralPanel, Hyperlink, Color32,
     };
 
     use crate::{
         auth::{
             auth::{LastUser, Login},
-            auth_data::auth_data::AuthData,
             auth_service::auth_service::AuthService,
         },
         form::form::{Form, FormName},
         registry::registry::Registry,
-        registry_repository::registry_repository::RegistryRepository,
         REGISTRY,
     };
     pub const ROW_PADDING: f32 = 5.0;
@@ -168,7 +156,7 @@ pub mod form {
     }
 
     impl Form for AuthForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
+        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.horizontal(|ui: &mut Ui| {
                 ui.group(|ui| {
                     ui.set_max_width(300.0);

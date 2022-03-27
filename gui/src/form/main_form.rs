@@ -1,22 +1,16 @@
 pub mod main_form {
     use eframe::egui::{
-        self,
-        Button,
-        CtxRef,
-        Label,
-        Layout,
-        TopBottomPanel,
+        TopBottomPanel, self, Context,
     };
 
     use crate::{
-        form::form::{Form, FormName},
-        registry::registry::Registry, settings::settings::COLOR_RED, menu::form::menu_form::MenuForm,
+        form::form::{Form }, menu::form::menu_form::MenuForm,
     };
 
     pub struct GUI {}
 
     impl GUI {
-        pub fn render(form: impl Form, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
+        pub fn render(form: impl Form, ui: &mut egui::Ui, ctx: &Context) {
             form.render(ui, ctx);
         }
     }
@@ -26,7 +20,7 @@ pub mod main_form {
             GUI {}
         }
 
-        pub(crate) fn render_top_panel(&self, ctx: &CtxRef) {
+        pub(crate) fn render_top_panel(&self, ctx: &Context) {
             // define a TopBottomPanel widget
             TopBottomPanel::top("top_panel").show(ctx, |ui| {
                 ui.add_space(10.);

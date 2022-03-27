@@ -1,7 +1,7 @@
 pub mod resource_list_form {
 
     use eframe::egui::{
-        self, Align, Align2, Button, CtxRef, Label, Layout, ScrollArea, Separator, Vec2, Window,
+        self, Align, Align2, Button, Label, Layout, ScrollArea, Separator, Vec2, Window, Context, RichText, 
     };
 
     use crate::{
@@ -13,10 +13,12 @@ pub mod resource_list_form {
             resource_add_service::resource_add_service::ResourceAddService,
         },
         resource_list::resource_list_service::resource_list_service::ResourceListService,
-        settings::settings::{COLOR_BLUE, COLOR_RED, COLOR_WHITE, EDIT_FIELD_PADDING_BOTTOM},
+        settings::settings::{COLOR_BLUE, COLOR_RED, COLOR_WHITE, EDIT_FIELD_PADDING_BOTTOM, LIST_ROW_PADDING_BOTTOM, COLUMN_LEVEL_ONE_MARGIN, COLUMN_LEVEL_TWO_MARGIN, BG_COLOR_BUTTON, COLOR_GREEN, COLOR_BLACK},
         REGISTRY,
     };
-    const PADDING: f32 = 10.;
+
+    const MIN_HEIGHT_FORM: f32 = 300.;
+
     pub struct ResourceListForm {
         resource_list_service: ResourceListService,
         resource_add_service: ResourceAddService,
@@ -30,17 +32,15 @@ pub mod resource_list_form {
             }
         }
 
-        fn resource_list(&self, ui: &mut eframe::egui::Ui, _ctx: &CtxRef) {
+        fn resource_list(&self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             ui.group(|ui| {
                 ui.set_max_width(200.0);
                 ui.set_min_width(100.0);
                 ScrollArea::vertical().show(ui, |ui: &mut eframe::egui::Ui| {
                     ui.with_layout(Layout::top_down_justified(Align::Center), |ui| {
-                        // ui.vertical(|ui: &mut eframe::egui::Ui| {
-                        // ui.set_height(20.);
-                        ui.label("Ресурсы:");
-
+                        ui.heading("Ресурсы:");
                         ui.add_space(10.);
+
                         let login = REGISTRY.lock().unwrap().auth_data.login.clone();
 
                         match self.resource_list_service.resource_list(&login) {
@@ -50,7 +50,6 @@ pub mod resource_list_form {
                                 ()
                             }
                         };
-                        // });
                     });
                 });
             });
@@ -117,19 +116,33 @@ pub mod resource_list_form {
                     ResourcseAddFormFacade::set_resource_field_changed(false);
                 }
 
-                ui.add_space(PADDING);
+                ui.add_space(LIST_ROW_PADDING_BOTTOM);
                 ui.add(Separator::default());
-                ui.add_space(PADDING);
+                ui.add_space(LIST_ROW_PADDING_BOTTOM);
             }
         }
 
-        fn edit_area(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
-            self.fields(ui, ctx);
-            self.controls(ui, ctx);
+        fn edit_area(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
+            ui.group(|ui| {
+                ui.set_min_height(MIN_HEIGHT_FORM);
+                self.fields(ui, ctx);
+                ui.add_space(COLUMN_LEVEL_TWO_MARGIN);
+                self.controls(ui, ctx);
+            });
+            
         }
 
-        fn fields(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
+        fn fields(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.with_layout(Layout::top_down(Align::LEFT), |ui| {
+                ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                    ui.set_max_width(200.);
+                    ui.add(Label::new(RichText::new("Подробно:").size(25.).color(COLOR_BLUE))
+                    // .text_color(COLOR_BLUE)
+                    // .heading()
+                );
+                });
+                ui.add_space(EDIT_FIELD_PADDING_BOTTOM);
+
                 ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
                     ui.set_max_width(200.);
                     ui.label("Ресурс:");
@@ -197,7 +210,7 @@ pub mod resource_list_form {
             });
         }
 
-        fn controls(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
+        fn controls(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
                 ui.horizontal_top(|ui| {
                     self.save_changes_btn(ui);
@@ -210,12 +223,10 @@ pub mod resource_list_form {
         }
 
         // TODO: перенести в панель кнопку + изменение
-        fn delete_btn(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef, resource_name: String) {
+        fn delete_btn(&self, ui: &mut eframe::egui::Ui, ctx: &Context, resource_name: String) {
             // ui.with_layout(Layout::left_to_right(), |ui| {
             let remove_btn = ui.add(
-                Button::new("⊗")
-                    .text_style(egui::TextStyle::Body)
-                    .text_color(COLOR_RED),
+                Button::new(RichText::new("⊗").color(COLOR_RED).background_color(BG_COLOR_BUTTON))
             );
             // });
 
@@ -237,10 +248,12 @@ pub mod resource_list_form {
                     window_ui.with_layout(Layout::top_down_justified(Align::Center), |layout_ui| {
                         layout_ui.add_space(10.);
                         layout_ui.spacing_mut().button_padding = Vec2::new(10., 5.);
-                        layout_ui.spacing_mut().window_padding = Vec2::new(10., 5.);
+                        // layout_ui.spacing_mut().window_padding = Vec2::new(10., 5.);
                         layout_ui.spacing_mut().item_spacing = Vec2::new(10., 10.);
                         layout_ui.add(Label::new(format!("Точно удалить {}?", resource_name)));
-                        let yes_btn = layout_ui.add(Button::new("Да").text_color(COLOR_RED));
+                        let yes_btn = layout_ui.add(Button::new("Да")
+                        // .text_color(COLOR_RED)
+                    );
 
                         if yes_btn.clicked() {
                             let new_resource_name = ResourcseAddFormFacade::new_resource_name();
@@ -259,6 +272,7 @@ pub mod resource_list_form {
                             match self.resource_list_service.resource_delete(resource) {
                                 Ok(_) => {
                                     ResourcseAddFormFacade::set_show_confirm_delete_window(false);
+                                    ResourcseAddFormFacade::set_current_resource_name("".to_string());
                                 }
                                 Err(e) => {
                                     ResourcseAddFormFacade::set_delete_error_msg(e.to_string());
@@ -266,7 +280,9 @@ pub mod resource_list_form {
                             };
                         }
 
-                        let close_btn = layout_ui.add(Button::new("Нет").text_color(COLOR_WHITE));
+                        let close_btn = layout_ui.add(Button::new("Нет")
+                        // .text_color(COLOR_WHITE)
+                    );
 
                         if close_btn.clicked() {
                             ResourcseAddFormFacade::set_show_confirm_delete_window(false);
@@ -281,9 +297,7 @@ pub mod resource_list_form {
         fn save_changes_btn(&self, ui: &mut eframe::egui::Ui) {
             let edit_btn = ui.add_enabled(
                 ResourcseAddFormFacade::is_resource_field_changed(),
-                Button::new("💾")
-                    .text_style(egui::TextStyle::Body)
-                    .text_color(COLOR_BLUE),
+                Button::new(RichText::new("💾").color(COLOR_BLUE).background_color(BG_COLOR_BUTTON))
             );
 
             if !edit_btn.clicked() {
@@ -366,20 +380,22 @@ pub mod resource_list_form {
     }
 
     impl Form for ResourceListForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &CtxRef) {
+        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.vertical(|ui: &mut eframe::egui::Ui| {
                 GUI::render(ResourceAddForm::new(), ui, ctx);
 
                 ui.add_space(20.);
 
                 ui.horizontal(|ui: &mut eframe::egui::Ui| {
-                    ui.set_min_height(300.0);
+                    ui.set_min_height(MIN_HEIGHT_FORM);
 
                     self.resource_list(ui, ctx);
 
                     if ResourcseAddFormFacade::current_resource_name().is_empty() {
                         return;
                     }
+
+                    ui.add_space(COLUMN_LEVEL_ONE_MARGIN);
 
                     self.edit_area(ui, ctx);
                 });

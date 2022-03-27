@@ -27,7 +27,7 @@ use std::sync::Mutex;
 use tracing_subscriber;
 
 use eframe::{
-    egui::{self, CentralPanel, Ui, Vec2},
+    egui::{self, CentralPanel, Ui, Vec2, FontData},
     epi::App,
     run_native, NativeOptions,
 };
@@ -40,25 +40,27 @@ lazy_static! {
 }
 
 impl GUI {
-    fn preset(ctx: &eframe::egui::CtxRef, ui: &mut Ui) {
+    fn preset(ctx: &eframe::egui::Context, ui: &mut Ui) {
+        ctx.set_visuals(egui::Visuals::dark());
+
         let spacing = ui.spacing_mut();
         spacing.button_padding = Vec2::new(10., 5.);
         spacing.indent_ends_with_horizontal_line =true;
         
 
         let mut fonts = egui::FontDefinitions::default();
-        
-        fonts.font_data.insert("JetBrainsMonoMedium".to_owned(),
-   std::borrow::Cow::Borrowed(include_bytes!("../../JetBrainsMono-Medium.ttf")));
-
-        fonts.family_and_size.insert(
-            egui::TextStyle::Body,
-            (egui::FontFamily::Proportional, 15.0),
-        );
-        fonts.family_and_size.insert(
-            egui::TextStyle::Button,
-            (egui::FontFamily::Proportional, 15.0),
-        );
+        fonts.font_data.insert(
+            "JetBrainsMonoMedium".to_owned(),
+        FontData::from_static(include_bytes!("../../JetBrainsMono-Medium.ttf"))
+    );
+        // fonts.family_and_size.insert(
+        //     egui::TextStyle::Body,
+        //     (egui::FontFamily::Proportional, 15.0),
+        // );
+        // fonts.family_and_size.insert(
+        //     egui::TextStyle::Button,
+        //     (egui::FontFamily::Proportional, 15.0),
+        // );
         
         ctx.set_fonts(fonts);
     }
@@ -76,13 +78,13 @@ impl GUI {
 impl App for GUI {
     fn setup(
         &mut self,
-        _ctx: &eframe::egui::CtxRef,
-        _frame: &mut eframe::epi::Frame<'_>,
+        _ctx: &eframe::egui::Context,
+        _frame: &eframe::epi::Frame,
         _storage: Option<&dyn eframe::epi::Storage>,
     ) {
     }
 
-    fn update(&mut self, ctx: &eframe::egui::CtxRef, frame: &mut eframe::epi::Frame<'_>) {
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &eframe::epi::Frame) {
         self.render_top_panel(ctx);
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             GUI::preset(ctx, ui);

@@ -1,40 +1,57 @@
 pub mod menu_form {
-    use eframe::egui::{self, CtxRef, Label, Layout, Button};
+    use eframe::egui::{self, menu::SubMenu, Button, Context, Label, Layout, RichText};
 
-    use crate::{form::form::{Form, FormName}, settings::settings::COLOR_RED, registry::registry::Registry};
+    use crate::{
+        form::form::{Form, FormName},
+        registry::registry::Registry,
+        settings::settings::COLOR_RED,
+    };
 
-    pub struct MenuForm {
-    }
+    pub struct MenuForm {}
 
     impl MenuForm {
         pub fn new() -> MenuForm {
-           MenuForm {
+            MenuForm {
                 // resource_add_service: ResourceAddService::new()
             }
         }
     }
 
     impl Form for MenuForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, _ctx: &CtxRef) {
+        fn render(&self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             egui::menu::bar(ui, |ui| {
-
                 // controls
-                ui.with_layout(Layout::right_to_left(), |ui| {
-                    let _close_btn =
-                        ui.add(Button::new("❌").text_style(egui::TextStyle::Body));
 
-                    let refresh_btn =
-                        ui.add(Button::new("🔄").text_style(egui::TextStyle::Body));
+                ui.with_layout(Layout::left_to_right(), |ui| {
+                    ui.with_layout(Layout::left_to_right(), |ui| {
+                        egui::menu::menu_button(ui, RichText::new("Пароли"), |ui| {
+                            ui.add(
+                                Button::new("Базовый уровень безопасности"), // .text_style(egui::TextStyle::Body)
+                            );
+                            ui.add(
+                                Button::new("Использовать ключ"), // .text_style(egui::TextStyle::Body)
+                            );
+                        });
+                    });
 
-                    if refresh_btn.clicked() {
-                        Registry::set_current_form(FormName::Auth);
-                    }
+                    ui.with_layout(Layout::right_to_left(), |ui| {
+                        let _close_btn = ui.add(
+                            Button::new(RichText::new("❌")), // .text_style(egui::TextStyle::Body)
+                        );
 
-                    // let _theme_btn =
-                    //     ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+                        let refresh_btn = ui.add(
+                            Button::new("🔄"), // .text_style(egui::TextStyle::Body)
+                        );
+
+                        if refresh_btn.clicked() {
+                            Registry::set_current_form(FormName::Auth);
+                        }
+
+                        // let _theme_btn =
+                        //     ui.add(Button::new("🌙").text_style(egui::TextStyle::Body));
+                    });
                 });
             });
-
         }
     }
 }

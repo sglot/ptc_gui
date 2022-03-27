@@ -1,7 +1,5 @@
 pub mod resource_add_form {
-    use std::io::empty;
-
-    use eframe::egui::{self, CtxRef, Button};
+    use eframe::{egui::{self, Context, Button, WidgetText, RichText},};
 
     use crate::{form::form::Form, resource_add::{resource_add_service::resource_add_service::ResourceAddService, resource_add_form_facade::resource_add_form_facade::ResourcseAddFormFacade}, REGISTRY, resource::resource::resource::Resource, settings::settings::{COLOR_WHITE, COLOR_RED, COLOR_GREEN}};
 
@@ -46,7 +44,7 @@ pub mod resource_add_form {
     }
 
     impl Form for ResourceAddForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, _ctx: &CtxRef) {
+        fn render(&self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             ui.group(|ui| {
                 
                 ui.set_max_height(50.0);
@@ -72,7 +70,7 @@ pub mod resource_add_form {
                     });
 
                     tracing::error!("Добавить пароль");
-                    let add_btn = ui.add(Button::new("Добавить пароль").text_color(COLOR_GREEN));
+                    let add_btn = ui.add(Button::new(RichText::new("Добавить пароль").color(COLOR_GREEN) ));
 
                     if !add_btn.clicked() {
                         

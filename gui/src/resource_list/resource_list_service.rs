@@ -1,5 +1,5 @@
 pub mod resource_list_service {
-    use crate::{resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, self, resource::resource::Resource}, cryptor::cryptor::Cryptor, registry::registry::Registry};
+    use crate::{resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, self, resource::resource::Resource}, cryptor::cryptor::Cryptor, registry::registry::Registry, REGISTRY};
 
 
     pub struct ResourceListService {
@@ -14,8 +14,20 @@ pub mod resource_list_service {
         }
         
         pub fn resource_list(&self, login: &str) -> Result<Vec<String>, String> {
+            // требуется обновление кэша
+            // 1. delete res
+            // 2. add res
+
+            let changed_resource_list = REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.resource_list();
+            if (!changed_resource_list.is_empty()) {
+                return Ok(changed_resource_list)
+            }
+
             match self.resource_repository.get_list(&login) {
-                Ok(res) => Ok(res),
+                Ok(res) => {
+                    REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.set_resource_list(res.clone());
+                    Ok(res)
+                },
                 Err(e) => Err(e),
             }
         }
@@ -43,7 +55,10 @@ pub mod resource_list_service {
         pub fn resource_delete(&self, resource: Resource) -> Result<String, String> {
             tracing::error!("resource_delete");
             match self.resource_repository.delete(resource) {
-                Ok(res) => Ok(res),
+                Ok(res) => {
+                    REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.drop_resource_list();
+                    Ok(res)
+                },
                 Err(e) => Err(e),
             }
             

@@ -12,6 +12,10 @@ pub mod registry {
             REGISTRY.lock().unwrap().config.clone()
         }
 
+        pub fn config_set_secret_key(key: String) {
+            REGISTRY.lock().unwrap().config.set_secret_key(key);
+        }
+
         pub fn eq_current_form(form_name: FormName) -> bool {
             form_name == REGISTRY.lock().unwrap().current_form
         }

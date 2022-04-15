@@ -12,7 +12,6 @@ pub mod auth_data {
 
     impl AuthData {
         pub fn new() -> Self {
-            tracing::error!("AuthData new");
             Self {
                 enter_type: Login::Login,
                 login: "t".to_string(),

@@ -34,7 +34,7 @@ pub mod resource_repository_fs {
                 Ok(it) => it,
                 Err(err) => return Err(err.to_string()),
             };
-            tracing::error!("save_to_file write");
+
             match write!(output, "{}", data) {
                 Ok(_) => Ok("Ресурс успешно сохранён".to_string()),
                 Err(e) => return Err(e.to_string()),
@@ -52,7 +52,6 @@ pub mod resource_repository_fs {
                 true => Err(String::from("Такой ресурс уже существует")),
                 false => {
                     let cryptor = Cryptor { key: self.config.get_secret_key() };
-                    tracing::error!("save_savee");
 
                     let template_password_crypted = cryptor.crypt(&resource.template_password());
                     let mut resource_data:Vec<String> = Vec::new();
@@ -132,7 +131,7 @@ pub mod resource_repository_fs {
                 Ok(line) => line,
                 Err(e) => return Err(e.to_string()),
             };
-            tracing::error!("чтение файла get_list");
+
             let mut resources = vec![];
             for path in paths {
                 resources.push(
@@ -156,7 +155,7 @@ pub mod resource_repository_fs {
             // if !auth.check_auth(&login) {
             //     return String::from("Недостаточно прав");
             // }
-            tracing::error!("чтение файла find");
+
             let path_to_resource_data = self.maker.make_template_path(user_login, &resource);
 
             let resource_data = match fs::read_to_string(path_to_resource_data) {

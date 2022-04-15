@@ -33,5 +33,9 @@ pub mod cryptor {
                 Err(e) => Err(e.to_string()),
             }
         }
+
+        pub fn set_key(&mut self, key: String) {
+            self.key = key;
+        }
     }
 }

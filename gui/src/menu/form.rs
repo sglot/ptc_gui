@@ -18,7 +18,7 @@ pub mod menu_form {
     }
 
     impl Form for MenuForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
+        fn render(&mut self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             egui::menu::bar(ui, |ui| {
                 // controls
 

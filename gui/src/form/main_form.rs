@@ -10,7 +10,7 @@ pub mod main_form {
     pub struct GUI {}
 
     impl GUI {
-        pub fn render(form: impl Form, ui: &mut egui::Ui, ctx: &Context) {
+        pub fn render(mut form: impl Form, ui: &mut egui::Ui, ctx: &Context) {
             form.render(ui, ctx);
         }
     }

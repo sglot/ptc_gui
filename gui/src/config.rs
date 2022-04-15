@@ -26,6 +26,11 @@ pub mod config {
             self.secret_key.clone()
         }
 
+        pub fn set_secret_key(&mut self, key: String) -> &Self {
+            self.secret_key = key;
+            self
+        }
+
         pub fn get_template_file_name(&self) -> &str {
             &self.template_file_name
         }

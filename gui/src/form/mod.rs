@@ -26,6 +26,6 @@ pub mod form {
     }
 
     pub trait Form {
-        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &Context);
+        fn render(&mut self, ui: &mut eframe::egui::Ui, ctx: &Context);
     }
 }

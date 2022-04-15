@@ -1,5 +1,5 @@
 pub mod resource_add_form {
-    use eframe::{egui::{self, Context, Button, WidgetText, RichText},};
+    use eframe::{egui::{self, Context, Button, WidgetText, RichText, TextEdit},};
 
     use crate::{form::form::Form, resource_add::{resource_add_service::resource_add_service::ResourceAddService, resource_add_form_facade::resource_add_form_facade::ResourcseAddFormFacade}, REGISTRY, resource::resource::resource::Resource, settings::settings::{COLOR_WHITE, COLOR_RED, COLOR_GREEN}};
 
@@ -44,7 +44,7 @@ pub mod resource_add_form {
     }
 
     impl Form for ResourceAddForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
+        fn render(&mut self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             ui.group(|ui| {
                 
                 ui.set_max_height(50.0);
@@ -66,10 +66,11 @@ pub mod resource_add_form {
                     ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
                         ui.set_max_width(200.);
                         ui.label("Пароль:");
-                        ui.text_edit_singleline(&mut REGISTRY.lock().unwrap().form_data.resource_add.new_template_pass);
+                        ui.add(TextEdit::singleline(&mut REGISTRY.lock().unwrap().form_data.resource_add.new_template_pass).password(true));
+
+                        // ui.text_edit_singleline(&mut REGISTRY.lock().unwrap().form_data.resource_add.new_template_pass);
                     });
 
-                    tracing::error!("Добавить пароль");
                     let add_btn = ui.add(Button::new(RichText::new("Добавить пароль").color(COLOR_GREEN) ));
 
                     if !add_btn.clicked() {

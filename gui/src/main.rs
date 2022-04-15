@@ -41,7 +41,7 @@ lazy_static! {
 
 impl GUI {
     fn preset(ctx: &eframe::egui::Context, ui: &mut Ui) {
-        ctx.set_visuals(egui::Visuals::dark());
+        
 
         let spacing = ui.spacing_mut();
         spacing.button_padding = Vec2::new(10., 5.);
@@ -85,6 +85,7 @@ impl App for GUI {
     }
 
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &eframe::epi::Frame) {
+        ctx.set_visuals(egui::Visuals::dark());
         self.render_top_panel(ctx);
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             GUI::preset(ctx, ui);

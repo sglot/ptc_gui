@@ -18,27 +18,25 @@ pub mod auth_service {
             }
         }
 
-        pub fn reg(&self, login: String, pass: String) -> Result<String, String> {
+        pub fn reg(&mut self, login: String, pass: String) -> Result<String, String> {
             let config = Config::new();
 
             let user = User::new(&login, &pass);
             let user_repository = UserRepositoryFS::new(&config);
-            tracing::error!("1");
+
             match user_repository.exists(user) {
                 true => Err("Такой пользователь уже существует".to_string()),
                 false => {
-                    // let mut key = config.get_secret_key();
-                    // let cryptor = Cryptor { key: key };
-                    tracing::error!("2");
+                    self.cryptor.set_key(pass.to_string());
                     match user_repository.save(&login, &self.cryptor.crypt(&pass.to_string())) {
-                        Ok(res) => {tracing::error!("3");Ok(res)},
-                        Err(e) => {tracing::error!("4");Err(e.to_string())},
+                        Ok(res) => {Ok(res)},
+                        Err(e) => {Err(e.to_string())},
                     }
                 }
             }
         }
 
-        pub fn authenticate(&self, login: String, pass: String) -> Result<String, String> {
+        pub fn authenticate(&mut self, login: String, pass: String) -> Result<String, String> {
             match self.auth.check_auth(&login, &pass) {
                 Ok(res) => if res {
                     Ok("Успех".to_string())

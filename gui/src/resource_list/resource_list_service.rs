@@ -53,7 +53,6 @@ pub mod resource_list_service {
         }
 
         pub fn resource_delete(&self, resource: Resource) -> Result<String, String> {
-            tracing::error!("resource_delete");
             match self.resource_repository.delete(resource) {
                 Ok(res) => {
                     REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.drop_resource_list();

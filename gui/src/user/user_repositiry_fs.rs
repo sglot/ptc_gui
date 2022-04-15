@@ -25,7 +25,6 @@ pub mod user_repositiry_fs {
             use std::io::Write;
             let mut output = File::create(&path)?;
             write!(output, "{}", data)?;
-            tracing::error!("Пользователь успешно создан");
             Ok(String::from("Пользователь успешно создан"))
         }
 

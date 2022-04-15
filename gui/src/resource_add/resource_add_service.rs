@@ -14,7 +14,6 @@ pub mod resource_add_service {
         }
         
         pub fn resource_add(&self, resource: Resource) -> Result<String, String> {
-            tracing::error!("resource_add");
             match self.resource_repository.save(resource) {
                 Ok(res) => {
                     REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.drop_resource_list();
@@ -25,7 +24,6 @@ pub mod resource_add_service {
         }
 
         pub fn resource_update(&self, resource: Resource) -> Result<String, String> {
-            tracing::error!("resource_update");
             match self.resource_repository.update(resource) {
                 Ok(res) => {
                     REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.drop_resource_list();

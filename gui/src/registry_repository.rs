@@ -18,7 +18,6 @@ pub mod registry_repository {
             let config = Config::new();
 
             let last_user:LastUser = confy::load_path("./last-users-list.tmp").unwrap_or_default();
-            tracing::error!("loaded  {:?}", last_user);
             
             RegistryRepository {
                 auth_data: AuthData::new(),

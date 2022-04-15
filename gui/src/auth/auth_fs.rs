@@ -18,7 +18,8 @@ pub mod auth_fs {
             }
         }
 
-        pub fn check_auth(&self, login: &str, pass: &str) -> Result<bool, String> {
+        pub fn check_auth(&mut self, login: &str, pass: &str) -> Result<bool, String> {
+            self.cryptor.set_key(pass.to_string());
             let pass: String = self.cryptor.crypt(&pass);
 
             let user_path = self.maker.make_user_path(login);
@@ -43,7 +44,7 @@ pub mod auth_fs {
         fn auth_err() {
             let cryptor = Cryptor { key:"test".to_string() };
             let maker = MakerFS::new(Config::new());
-            let auth = AuthFs::new(cryptor.clone(), maker.clone());
+            let mut auth = AuthFs::new(cryptor.clone(), maker.clone());
 
             assert!(auth.check_auth("1", "2").is_err());
         }
@@ -53,7 +54,7 @@ pub mod auth_fs {
             let config = Config::new();
             let cryptor = Cryptor { key: config.get_secret_key() };
             let maker = MakerFS::new(Config::new());
-            let auth = AuthFs::new(cryptor.clone(), maker.clone());
+            let mut auth = AuthFs::new(cryptor.clone(), maker.clone());
 
 
             let user_repository = UserRepositoryFS::new(&config);
@@ -67,7 +68,7 @@ pub mod auth_fs {
             let config = Config::new();
             let cryptor = Cryptor { key: config.get_secret_key() };
             let maker = MakerFS::new(Config::new());
-            let auth = AuthFs::new(cryptor.clone(), maker.clone());
+            let mut auth = AuthFs::new(cryptor.clone(), maker.clone());
 
 
             let user_repository = UserRepositoryFS::new(&config);

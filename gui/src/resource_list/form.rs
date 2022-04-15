@@ -380,7 +380,7 @@ pub mod resource_list_form {
     }
 
     impl Form for ResourceListForm {
-        fn render(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
+        fn render(&mut self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.vertical(|ui: &mut eframe::egui::Ui| {
                 GUI::render(ResourceAddForm::new(), ui, ctx);
 

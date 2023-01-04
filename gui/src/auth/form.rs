@@ -1,8 +1,10 @@
 pub mod form {
     use eframe::egui::{
         self,
-        Ui, Context, TextEdit,
+        Context,
+        TextEdit,
         //  ScrollArea, Separator, TextBuffer,   Vec2, CentralPanel, Hyperlink, Color32,
+        Ui,
     };
 
     use crate::{
@@ -74,10 +76,15 @@ pub mod form {
             ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
                 ui.add_space(TOP_PADDING);
                 ui.add_space(TOP_PADDING);
-                ui.add_space(TOP_PADDING/3.5);
+                ui.add_space(TOP_PADDING / 3.5);
 
                 ui.label("Пароль:");
-                ui.add(TextEdit::singleline(&mut *REGISTRY.lock().unwrap().auth_data.pass.lock().unwrap()).password(true));
+                let pass_field = ui.add(
+                    TextEdit::singleline(
+                        &mut *REGISTRY.lock().unwrap().auth_data.pass.lock().unwrap(),
+                    )
+                    .password(true),
+                );
 
                 // let p = ui.text_edit_singleline(
                 //     &mut *REGISTRY.lock().unwrap().auth_data.pass.lock().unwrap(),
@@ -85,7 +92,9 @@ pub mod form {
 
                 ui.add_space(ROW_PADDING);
 
-                if !ui.button("Ввод").clicked() {
+                if !(ui.button("Ввод").clicked()
+                    || (pass_field.lost_focus() && ui.input().key_pressed(egui::Key::Enter)))
+                {
                     ui.label(REGISTRY.lock().unwrap().auth_data.error_msg());
                     return;
                 }

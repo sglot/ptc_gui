@@ -16,6 +16,8 @@ pub mod resource;
 pub mod resource_add;
 pub mod resource_list;
 pub mod menu;
+pub mod footer;
+pub mod generate_password;
 
 use crate::{
     registry::registry::Registry, registry_repository::registry_repository::RegistryRepository,
@@ -100,6 +102,7 @@ impl App for GUI {
                 ui.horizontal(|ui: &mut Ui| GUI::render(ResourceListForm::new(), ui, ctx));
             }
         });
+        self.render_bottom_panel(ctx);
     }
 
     fn name(&self) -> &str {

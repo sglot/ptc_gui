@@ -4,7 +4,7 @@ pub mod main_form {
     };
 
     use crate::{
-        form::form::{Form }, menu::form::menu_form::MenuForm,
+        form::form::{Form }, menu::form::menu_form::MenuForm, footer::form::footer_form::FooterForm,
     };
 
     pub struct GUI {}
@@ -26,6 +26,15 @@ pub mod main_form {
                 ui.add_space(10.);
                 GUI::render(MenuForm::new(), ui, ctx);
                 ui.add_space(10.);
+            });
+        }
+
+        pub(crate) fn render_bottom_panel(&self, ctx: &Context) {
+            // define a TopBottomPanel widget
+            TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
+                // ui.add_space(10.);
+                GUI::render(FooterForm::new(), ui, ctx);
+                // ui.add_space(10.);
             });
         }
     }

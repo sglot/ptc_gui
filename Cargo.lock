@@ -1637,6 +1637,7 @@ dependencies = [
  "lazy_static",
  "magic-crypt",
  "memory-cache-rs",
+ "rand",
  "serde",
  "tracing",
  "tracing-subscriber",

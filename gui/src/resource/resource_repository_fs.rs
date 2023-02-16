@@ -5,6 +5,7 @@ pub mod resource_repository_fs {
     use crate::resource::resource::resource::Resource;
     use crate::resource::resource_repository::resource_repository::ResourceRepository;
     use crate::support::fs::maker::maker_fs::MakerFS;
+    use crate::support::fs::save::{self, save_fs};
     use std::fs;
     use std::path::Path;
 
@@ -20,22 +21,7 @@ pub mod resource_repository_fs {
             data: &str,
             storage_file_name: &str,
         ) -> Result<String, String> {
-            use std::fs::File;
-            use std::io::Write;
-
-            let mut path = String::from(path_to);
-            match fs::create_dir_all(&path) {
-                Ok(it) => it,
-                Err(err) => return Err(err.to_string()),
-            };
-
-            path.push_str(storage_file_name);
-            let mut output = match File::create(&path) {
-                Ok(it) => it,
-                Err(err) => return Err(err.to_string()),
-            };
-
-            match write!(output, "{}", data) {
+            match save_fs::save_to_file(path_to, data, storage_file_name) {
                 Ok(_) => Ok("Ресурс успешно сохранён".to_string()),
                 Err(e) => return Err(e.to_string()),
             }

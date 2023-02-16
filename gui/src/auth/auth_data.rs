@@ -8,6 +8,7 @@ pub mod auth_data {
         pub login: String,
         pub pass: Mutex<String>,
         pub error_msg: Mutex<String>,
+        pub is_auth: bool,
     }
 
     impl AuthData {
@@ -17,6 +18,7 @@ pub mod auth_data {
                 login: "t".to_string(),
                 pass: Mutex::new("t".to_string()),
                 error_msg: Mutex::new("".to_string()),
+                is_auth: false,
             }
         }
 

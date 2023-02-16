@@ -13,57 +13,61 @@ pub mod maker_fs {
         }
 
         pub fn make_user_path(&self, login: &str) -> String {
-            let mut path = String::new();
             let storage_file_name: &str = self.config.get_user_password_file_name();
 
-            path.push_str(self.config.get_root_path());
-            path.push_str("./.ptc/");
-            path.push_str(login);
+            let mut path = self.make_user_home_dir(login);
             path.push_str(storage_file_name);
 
             path
         }
 
         pub fn make_template_path(&self, login: &str, resource: &str) -> String {
-            let mut path = String::new();
             let storage_file_name: &str = self.config.get_template_file_name();
 
-            path.push_str(self.config.get_root_path());
-            path.push_str("./.ptc/");
-            path.push_str(login);
-            path.push_str("/templates/");
-            path.push_str(resource);
+            let mut path = self.make_template_dir(login, resource);
             path.push_str(storage_file_name);
 
             path
         }
 
         pub fn make_template_dir(&self, login: &str, resource: &str) -> String {
-            let mut path = String::new();
-            path.push_str(self.config.get_root_path());
-            path.push_str("./.ptc/");
-            path.push_str(login);
-            path.push_str("/templates/");
+            let mut path = self.make_user_templates_dir(login);
             path.push_str(resource);
+
             path
         }
 
         pub fn make_user_templates_dir(&self, login: &str) -> String {
-            let mut path = String::new();
-            path.push_str(self.config.get_root_path());
-            path.push_str("./.ptc/");
-            path.push_str(login);
+            let mut path = self.make_user_home_dir(login);
             path.push_str("/templates/");
+
             path
         }
 
         pub fn make_user_home_dir(&self, login: &str) -> String {
             let mut path = String::new();
             path.push_str(self.config.get_root_path());
-            path.push_str(".//.ptc//");
+            path.push_str("./.ptc/users/");
             path.push_str(login);
 
             path
+        }
+
+        // notebook
+        pub fn make_user_notebook_dir(&self, login: &str) -> String {
+            let mut path = self.make_user_home_dir(login);
+            path.push_str("/notebook/");
+            
+            path
+        }
+
+        // service
+        pub fn make_db_path(&self, entyty: String) -> String {
+            format!("{}/{}.db", self.make_program_data_path(), entyty)
+        }
+
+        pub fn make_program_data_path(&self) -> String {
+            format!("{}./.ptc/program_data", self.config.get_root_path())
         }
     }
 }

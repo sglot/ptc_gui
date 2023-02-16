@@ -128,6 +128,11 @@ pub mod form {
                     match auth_service.authenticate(login, pass) {
                         Ok(r) => {
                             Registry::set_current_form(FormName::ResourceList);
+                            REGISTRY
+                                .lock()
+                                .unwrap()
+                                .auth_data
+                                .is_auth = true;
                             r
                         }
                         Err(e) => {

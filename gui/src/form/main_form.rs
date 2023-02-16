@@ -4,7 +4,7 @@ pub mod main_form {
     };
 
     use crate::{
-        form::form::{Form }, menu::form::menu_form::MenuForm, footer::form::footer_form::FooterForm,
+        form::form::{Form}, menu::form::menu_form::MenuForm, footer::form::footer_form::FooterForm,
     };
 
     pub struct GUI {}

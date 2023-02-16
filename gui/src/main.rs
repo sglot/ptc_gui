@@ -1,4 +1,7 @@
 pub mod auth;
+pub mod notebook;
+pub mod note;
+pub mod tag;
 pub mod bootstrap;
 pub mod registry;
 pub mod registry_repository;
@@ -24,7 +27,10 @@ use crate::{
 };
 use auth::form::form::AuthForm;
 use form::{form::FormName, main_form::main_form::GUI};
+use notebook::form::form::NotebookForm;
 use resource_list::form::resource_list_form::ResourceListForm;
+use tag::tag_repository_fs::tag_repository_fs::TagRepositoryFS;
+use tag::tag_repository::tag_repository::TagRepository;
 use std::sync::Mutex;
 use tracing_subscriber;
 
@@ -43,7 +49,6 @@ lazy_static! {
 
 impl GUI {
     fn preset(ctx: &eframe::egui::Context, ui: &mut Ui) {
-        
 
         let spacing = ui.spacing_mut();
         spacing.button_padding = Vec2::new(10., 5.);
@@ -101,6 +106,10 @@ impl App for GUI {
             if Registry::eq_current_form(FormName::ResourceList) {
                 ui.horizontal(|ui: &mut Ui| GUI::render(ResourceListForm::new(), ui, ctx));
             }
+            
+            if Registry::eq_current_form(FormName::Notebook) {
+                ui.horizontal(|ui: &mut Ui| GUI::render(NotebookForm::new(), ui, ctx));
+            }
         });
         self.render_bottom_panel(ctx);
     }
@@ -111,6 +120,8 @@ impl App for GUI {
 }
 fn main() {
     tracing_subscriber::fmt::init();
+
+    bootstrap::bootstrap::init(Registry::config());
 
     let app = GUI::new();
     let mut win_options = NativeOptions::default();

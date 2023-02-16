@@ -24,6 +24,10 @@ pub mod registry {
             REGISTRY.lock().unwrap().current_form = form_name;
         }
 
+        pub fn is_auth() -> bool {
+            REGISTRY.lock().unwrap().auth_data.is_auth == true
+        }
+
         // pub fn auth_data() -> Result<&'a mut AuthData, std::sync::PoisonError<&'a AuthData>> {
         //     REGISTRY.lock().unwrap().auth_data.get_mut()
         // }

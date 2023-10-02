@@ -1,4 +1,6 @@
 pub mod maker_fs {
+    use chrono::Utc;
+
     use crate::config::config::Config;
 
 
@@ -68,6 +70,14 @@ pub mod maker_fs {
 
         pub fn make_program_data_path(&self) -> String {
             format!("{}./.ptc/program_data", self.config.get_root_path())
+        }
+
+        pub fn delimiter(&self) -> &str {
+            "@,@"
+        }
+
+        pub fn year(&self) -> String {
+            Utc::now().format("%Y").to_string()
         }
     }
 }

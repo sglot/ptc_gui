@@ -5,7 +5,7 @@ pub mod resource_repository_fs {
     use crate::resource::resource::resource::Resource;
     use crate::resource::resource_repository::resource_repository::ResourceRepository;
     use crate::support::fs::maker::maker_fs::MakerFS;
-    use crate::support::fs::save::{self, save_fs};
+    use crate::support::fs::save::save_fs;
     use std::fs;
     use std::path::Path;
 

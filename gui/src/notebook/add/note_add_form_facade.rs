@@ -1,5 +1,5 @@
 pub mod note_add_form_facade {
-    use crate::REGISTRY;
+    use crate::{notebook::add::note_add_form_data::note_add_form_data::NoteAddFormData, REGISTRY};
 
     pub struct NoteAddFormFacade {}
 
@@ -61,12 +61,7 @@ pub mod note_add_form_facade {
         }
 
         pub fn drop_create_tag() {
-            REGISTRY
-                .lock()
-                .unwrap()
-                .form_data
-                .note_add
-                .create_tag = "".to_string();
+            REGISTRY.lock().unwrap().form_data.note_add.create_tag = "".to_string();
         }
 
         pub fn push_to_tag_list(tag: String) {
@@ -75,16 +70,12 @@ pub mod note_add_form_facade {
                 .unwrap()
                 .form_data
                 .note_add
-                .tag_list.push(tag);
+                .tag_list
+                .push(tag);
         }
 
         pub fn set_tag_list(tags: Vec<String>) {
-            REGISTRY
-                .lock()
-                .unwrap()
-                .form_data
-                .note_add
-                .tag_list = tags;
+            REGISTRY.lock().unwrap().form_data.note_add.tag_list = tags;
         }
 
         pub fn show_confirm_delete_window() -> bool {
@@ -106,6 +97,25 @@ pub mod note_add_form_facade {
                 .show_confirm_delete_window = data;
         }
 
+        pub fn show_confirm_delete_note_window() -> bool {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .note_add
+                .show_confirm_delete_note_window
+                .clone()
+        }
+
+        pub fn set_show_confirm_delete_note_window(data: bool) {
+            REGISTRY
+                .lock()
+                .unwrap()
+                .form_data
+                .note_add
+                .show_confirm_delete_note_window = data;
+        }
+
         pub fn tag_for_delete() -> String {
             REGISTRY
                 .lock()
@@ -117,12 +127,26 @@ pub mod note_add_form_facade {
         }
 
         pub fn set_tag_for_delete(data: String) {
+            REGISTRY.lock().unwrap().form_data.note_add.tag_for_delete = data;
+        }
+
+        pub fn note_for_delete() -> u64 {
             REGISTRY
                 .lock()
                 .unwrap()
                 .form_data
                 .note_add
-                .tag_for_delete = data;
+                .note_for_delete()
+        }
+
+        pub fn set_note_for_delete(data: u64) {
+            REGISTRY.lock().unwrap().form_data.note_add.set_note_for_delete(data);
+        }
+
+        pub fn set_default() {
+            let tags = REGISTRY.lock().unwrap().form_data.note_add.tag_list.clone();
+            REGISTRY.lock().unwrap().form_data.note_add = NoteAddFormData::new();
+            REGISTRY.lock().unwrap().form_data.note_add.tag_list = tags.clone();
         }
 
         // pub fn current_resource_name() -> String {
@@ -238,8 +262,6 @@ pub mod note_add_form_facade {
         //         .note_add
         //         .new_resource_name = data;
         // }
-
-    
 
         // pub fn is_resource_field_changed() -> bool {
         //     REGISTRY

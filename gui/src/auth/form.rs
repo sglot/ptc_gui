@@ -3,7 +3,6 @@ pub mod form {
         self,
         Context,
         TextEdit,
-        //  ScrollArea, Separator, TextBuffer,   Vec2, CentralPanel, Hyperlink, Color32,
         Ui,
     };
 
@@ -162,7 +161,7 @@ pub mod form {
     }
 
     impl Form for AuthForm {
-        fn render(&mut self, ui: &mut eframe::egui::Ui, ctx: &Context) {
+        fn render(&mut self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             ui.horizontal(|ui: &mut Ui| {
                 ui.group(|ui| {
                     ui.set_max_width(300.0);

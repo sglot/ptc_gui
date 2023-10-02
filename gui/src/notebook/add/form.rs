@@ -1,6 +1,10 @@
 pub mod note_add_form {
-    use chrono::{Datelike, Timelike, Utc};
-    use eframe::{egui::{self, Button, Context, RichText, TextEdit, WidgetText, ScrollArea, Window, Layout, Label}, emath::{Align2, Align}, epaint::Vec2};
+    use chrono::Utc;
+    use eframe::{
+        egui::{self, Button, Context, Label, Layout, RichText, ScrollArea, TextEdit, Window},
+        emath::{Align, Align2},
+        epaint::Vec2,
+    };
     use std::convert::TryFrom;
 
     use crate::{
@@ -13,11 +17,8 @@ pub mod note_add_form {
         settings::settings::{
             COLOR_BLUE, COLOR_GREEN, COLOR_RED, COLOR_WHITE, COLOR_YELLOW, DATE_FORMAT,
         },
-        tag::{
-            tag_repository::{self, tag_repository::TagRepository},
-            tag_repository_fs::tag_repository_fs::TagRepositoryFS, tag_service::tag_service::TagService,
-        },
-        REGISTRY, resource_add::resource_add_form_facade::resource_add_form_facade::ResourcseAddFormFacade,
+        tag::tag_service::tag_service::TagService,
+        REGISTRY,
     };
 
     pub struct NoteAddForm {
@@ -33,7 +34,7 @@ pub mod note_add_form {
             }
         }
 
-        fn click_btn_add(&self, ui: &mut eframe::egui::Ui) {
+        fn click_btn_save(&self, _ui: &mut eframe::egui::Ui) {
             NoteAddFormFacade::set_add_error_msg("".to_string());
 
             let last_notes = REGISTRY
@@ -45,29 +46,26 @@ pub mod note_add_form {
                 .note_list();
             let last_note = last_notes.last();
 
+            let mut is_update = false;
+
             let new_id = match &last_note {
-                Some(note) => note.id() + 1,
+                Some(note) => {
+                    if REGISTRY.lock().unwrap().form_data.note_add.id == 0 {
+                        note.id() + 1
+                    } else {
+                        is_update = true;
+                        REGISTRY.lock().unwrap().form_data.note_add.id
+                    }
+                }
                 None => 1,
             };
 
-            let new_title = REGISTRY
-                .lock()
-                .unwrap()
-                .form_data
-                .note_add
-                .new_title
-                .clone();
-            let mut new_date = REGISTRY.lock().unwrap().form_data.note_add.new_date.clone();
-            let new_text = REGISTRY.lock().unwrap().form_data.note_add.new_text.clone();
-            let new_mileage = REGISTRY
-                .lock()
-                .unwrap()
-                .form_data
-                .note_add
-                .new_mileage
-                .clone();
-            let new_cost = REGISTRY.lock().unwrap().form_data.note_add.new_cost.clone();
-            let new_tags = REGISTRY.lock().unwrap().form_data.note_add.new_tags.clone();
+            let new_title = REGISTRY.lock().unwrap().form_data.note_add.title.clone();
+            let mut new_date = REGISTRY.lock().unwrap().form_data.note_add.date.clone();
+            let new_text = REGISTRY.lock().unwrap().form_data.note_add.text.clone();
+            let new_mileage = REGISTRY.lock().unwrap().form_data.note_add.mileage.clone();
+            let new_cost = REGISTRY.lock().unwrap().form_data.note_add.cost.clone();
+            let new_tags = REGISTRY.lock().unwrap().form_data.note_add.tags.clone();
             let login = REGISTRY.lock().unwrap().auth_data.login.clone();
 
             // if (new_resource_name.is_empty() || new_template_pass.is_empty() || new_resource_login.is_empty()) {
@@ -78,7 +76,7 @@ pub mod note_add_form {
                 new_date = Utc::now().format(DATE_FORMAT).to_string();
             }
 
-            let mut note = Note::new(
+            let note = Note::new(
                 new_id,
                 login,
                 new_date,
@@ -89,82 +87,107 @@ pub mod note_add_form {
                 new_tags,
             );
 
-            match self.note_add_service.add(note) {
-                Ok(_line) => (),
-                Err(e) => NoteAddFormFacade::set_add_error_msg(e.to_string()),
-            };
+            match is_update {
+                true => match self.note_add_service.update(note) {
+                    Ok(_line) => (),
+                    Err(e) => NoteAddFormFacade::set_add_error_msg(e.to_string()),
+                },
+                false => match self.note_add_service.add(note) {
+                    Ok(_line) => (),
+                    Err(e) => NoteAddFormFacade::set_add_error_msg(e.to_string()),
+                },
+            }
         }
 
         fn tag_grid(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
-                 egui::Grid::new("tag_grid").show(ui, |ui| {
-                        let mut count: i32 = 0;
-                        let tag_list = REGISTRY.lock().unwrap().form_data.note_add.tag_list.clone();
+            egui::Grid::new("tag_grid").show(ui, |ui| {
+                let mut count: i32 = 0;
+                let tag_list = REGISTRY.lock().unwrap().form_data.note_add.tag_list.clone();
 
-                        let tag_for_delete = NoteAddFormFacade::tag_for_delete();
+                let tag_for_delete = NoteAddFormFacade::tag_for_delete();
 
-                        for tag in &tag_list {
-                            let mut can_delete = true;
-                            count +=1;
+                for tag in &tag_list {
+                    let mut can_delete = true;
+                    count += 1;
 
-                            let tags = &REGISTRY.lock().unwrap().form_data.note_add.new_tags.clone();
-                            
-                            let index = tags.iter().position(|x| x.eq(tag));
-                            let tag_btn = match index {
-                                Some(_) => {
-                                    can_delete = false;
-                                    ui.add(Button::new(RichText::new(tag).color(COLOR_YELLOW)))
-                                },
-                                None => {
-                                    let mut color = COLOR_WHITE;
-                                    if tag.eq(&tag_for_delete) { color = COLOR_RED; };
-                                    
-                                    ui.add(Button::new(RichText::new(tag).color(color)))},
+                    let tags = &REGISTRY.lock().unwrap().form_data.note_add.tags.clone();
+
+                    let index = tags.iter().position(|x| x.eq(tag));
+                    let tag_btn = match index {
+                        Some(_) => {
+                            can_delete = false;
+                            ui.add(Button::new(RichText::new(tag).color(COLOR_YELLOW)))
+                        }
+                        None => {
+                            let mut color = COLOR_WHITE;
+                            if tag.eq(&tag_for_delete) {
+                                color = COLOR_RED;
                             };
 
-                            if tag_btn.clicked() {
-                                match index {
-                                    Some(i) => {
-                                        REGISTRY.lock().unwrap().form_data.note_add.new_tags.remove(usize::try_from(i).unwrap());
-                                        ()
-                                    },
-                                    None =>  REGISTRY.lock().unwrap().form_data.note_add.new_tags.push(tag.clone()),
-                                };
-                            }
-                            
-                            
-
-                            if tag_btn.clicked_by(egui::PointerButton::Secondary) {
-                                if (can_delete) {
-                                    NoteAddFormFacade::set_show_confirm_delete_window(true);
-                                    NoteAddFormFacade::set_tag_for_delete(tag.clone());
-                                }
-                            }
-
-                            if NoteAddFormFacade::show_confirm_delete_window() {
-                                self.delete_window(ui, ctx);
-                            }
-
-                            
-                            if count % 3 == 0 {
-                                ui.end_row();
-                            }
+                            ui.add(Button::new(RichText::new(tag).color(color)))
                         }
-                    });
+                    };
 
+                    if tag_btn.clicked() {
+                        match index {
+                            Some(i) => {
+                                REGISTRY
+                                    .lock()
+                                    .unwrap()
+                                    .form_data
+                                    .note_add
+                                    .tags
+                                    .remove(usize::try_from(i).unwrap());
+                                ()
+                            }
+                            None => REGISTRY
+                                .lock()
+                                .unwrap()
+                                .form_data
+                                .note_add
+                                .tags
+                                .push(tag.clone()),
+                        };
+                    }
+
+                    if tag_btn.clicked_by(egui::PointerButton::Secondary) {
+                        if can_delete {
+                            NoteAddFormFacade::set_show_confirm_delete_window(true);
+                            NoteAddFormFacade::set_tag_for_delete(tag.clone());
+                        }
+                    }
+
+                    if NoteAddFormFacade::show_confirm_delete_window() {
+                        self.delete_window(ui, ctx);
+                    }
+
+                    if count % 3 == 0 {
+                        ui.end_row();
+                    }
+                }
+            });
         }
 
         fn create_tag(&self, ui: &mut eframe::egui::Ui) {
             ui.with_layout(egui::Layout::left_to_right(), |ui| {
-                ui.add(TextEdit::singleline(&mut REGISTRY.lock().unwrap().form_data.note_add.create_tag,));
+                ui.add(TextEdit::singleline(
+                    &mut REGISTRY.lock().unwrap().form_data.note_add.create_tag,
+                ));
 
                 let add_btn = ui.add(Button::new(RichText::new("+тэг").color(COLOR_GREEN)));
-    
+
                 if !add_btn.clicked() {
                     return;
                 }
 
-                let new_tag = REGISTRY.lock().unwrap().form_data.note_add.create_tag.clone();
-    
+                let new_tag = REGISTRY
+                    .lock()
+                    .unwrap()
+                    .form_data
+                    .note_add
+                    .create_tag
+                    .clone();
+
                 if new_tag.is_empty() {
                     return;
                 }
@@ -173,15 +196,14 @@ pub mod note_add_form {
                     Ok(_line) => (),
                     Err(e) => NoteAddFormFacade::set_add_error_msg(e.to_string()),
                 };
-                
+
                 tracing::error!("2");
                 NoteAddFormFacade::drop_create_tag();
             });
         }
 
         // TODO: перенести в панель кнопку + изменение
-        fn delete_window(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
-            
+        fn delete_window(&self, _ui: &mut eframe::egui::Ui, ctx: &Context) {
             // ui.with_layout(Layout::left_to_right(), |ui| {
             // let remove_btn = ui.add(
             //     Button::new(RichText::new("⊗").color(COLOR_RED).background_color(BG_COLOR_BUTTON))
@@ -198,6 +220,7 @@ pub mod note_add_form {
             // }
 
             Window::new("Удаление")
+            .id(egui::Id::new("window_tag"))
                 .anchor(Align2::CENTER_CENTER, Vec2::new(0., 0.))
                 .show(ctx, |window_ui| {
                     window_ui.set_height(50.);
@@ -209,12 +232,11 @@ pub mod note_add_form {
                         // layout_ui.spacing_mut().window_padding = Vec2::new(10., 5.);
                         layout_ui.spacing_mut().item_spacing = Vec2::new(10., 10.);
                         layout_ui.add(Label::new(format!("Точно удалить {}?", "Тэг")));
-                        let yes_btn = layout_ui.add(Button::new("Да")
-                        // .text_color(COLOR_RED)
-                    );
+                        let yes_btn = layout_ui.add(
+                            Button::new("Да"), // .text_color(COLOR_RED)
+                        );
 
                         if yes_btn.clicked() {
-                            
                             // let new_resource_name = ResourcseAddFormFacade::new_resource_name();
                             // let new_template_name = ResourcseAddFormFacade::new_template_pass();
                             // let new_resource_login = ResourcseAddFormFacade::new_resource_login();
@@ -228,7 +250,7 @@ pub mod note_add_form {
                             //     login,
                             // );
 
-                            // даление тэга в общей переменной ошибки для формы
+                            // удаление тэга в общей переменной ошибки для формы
                             match self.tag_service.delete(NoteAddFormFacade::tag_for_delete()) {
                                 Ok(_) => {
                                     NoteAddFormFacade::set_show_confirm_delete_window(false);
@@ -241,9 +263,9 @@ pub mod note_add_form {
                             NoteAddFormFacade::set_tag_for_delete("".to_string());
                         }
 
-                        let close_btn = layout_ui.add(Button::new("Нет")
-                        // .text_color(COLOR_WHITE)
-                    );
+                        let close_btn = layout_ui.add(
+                            Button::new("Нет"), // .text_color(COLOR_WHITE)
+                        );
 
                         if close_btn.clicked() {
                             NoteAddFormFacade::set_show_confirm_delete_window(false);
@@ -260,78 +282,88 @@ pub mod note_add_form {
     impl Form for NoteAddForm {
         fn render(&mut self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.group(|ui| {
+                ui.with_layout(
+                    egui::Layout::top_down(egui::Align::LEFT).with_main_justify(true),
+                    |ui| {
+                        ui.with_layout(egui::Layout::left_to_right(), |ui| {
+                            ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                                ui.set_max_width(100.);
+                                ui.label("Дата:");
+                                ui.text_edit_singleline(
+                                    &mut REGISTRY.lock().unwrap().form_data.note_add.date,
+                                );
+                            });
 
-                ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
-                    ui.with_layout(egui::Layout::left_to_right(), |ui| {
-                        ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
-                            ui.set_max_width(100.);
-                            ui.label("Дата:");
-                            ui.text_edit_singleline(
-                                &mut REGISTRY.lock().unwrap().form_data.note_add.new_date,
+                            ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                                ui.set_max_width(150.);
+                                ui.label("Название:");
+                                ui.text_edit_singleline(
+                                    &mut REGISTRY.lock().unwrap().form_data.note_add.title,
+                                );
+                            });
+
+                            let refresh_btn = ui.add(Button::new("🔄"));
+
+                            if !refresh_btn.clicked() {
+                                return;
+                            }
+
+                            NoteAddFormFacade::set_default();
+                        });
+
+                        ui.add_space(10.);
+                        ui.colored_label(COLOR_BLUE, "Спец. данные");
+
+                        ui.with_layout(egui::Layout::left_to_right(), |ui| {
+                            ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                                ui.set_max_width(100.);
+                                ui.label("Пробег:");
+                                ui.text_edit_singleline(
+                                    &mut REGISTRY.lock().unwrap().form_data.note_add.mileage,
+                                );
+                            });
+
+                            ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
+                                ui.set_max_width(150.);
+                                ui.label("Сумма (руб.):");
+                                ui.text_edit_singleline(
+                                    &mut REGISTRY.lock().unwrap().form_data.note_add.cost,
+                                );
+                            });
+                        });
+
+                        ui.add_space(10.);
+                        ui.colored_label(COLOR_BLUE, "Комментарий");
+                        ui.add(TextEdit::multiline(
+                            &mut REGISTRY.lock().unwrap().form_data.note_add.text,
+                        ));
+
+                        ui.add_space(10.);
+
+                        ui.group(|ui| {
+                            ui.set_min_width(300.0);
+                            ui.set_min_height(200.0);
+                            ScrollArea::vertical().id_source("tag_scroll_area").show(
+                                ui,
+                                |ui: &mut eframe::egui::Ui| {
+                                    self.tag_grid(ui, ctx);
+                                    self.create_tag(ui);
+                                },
                             );
                         });
 
-                        ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
-                            ui.set_max_width(150.);
-                            ui.label("Название:");
-                            ui.text_edit_singleline(
-                                &mut REGISTRY.lock().unwrap().form_data.note_add.new_title,
-                            );
-                        });
-                    });
+                        ui.add_space(10.);
 
-                    ui.add_space(10.);
-                    ui.colored_label(COLOR_BLUE, "Спец. данные");
+                        let btn_save =
+                            ui.add(Button::new(RichText::new("Сохранить").color(COLOR_GREEN)));
 
-                    ui.with_layout(egui::Layout::left_to_right(), |ui| {
-                        ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
-                            ui.set_max_width(100.);
-                            ui.label("Пробег:");
-                            ui.text_edit_singleline(
-                                &mut REGISTRY.lock().unwrap().form_data.note_add.new_mileage,
-                            );
-                        });
+                        if !btn_save.clicked() {
+                            return;
+                        }
 
-                        ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
-                            ui.set_max_width(150.);
-                            ui.label("Сумма (руб.):");
-                            ui.text_edit_singleline(
-                                &mut REGISTRY.lock().unwrap().form_data.note_add.new_cost,
-                            );
-                        });
-                    });
-
-                    ui.add_space(10.);
-                    ui.colored_label(COLOR_BLUE, "Комментарий");
-                    ui.add(TextEdit::multiline(
-                        &mut REGISTRY.lock().unwrap().form_data.note_add.new_text,
-                    ));
-                    ui.add_space(10.);
-
-                    ui.group(|ui| {
-                        ui.set_min_width(300.0);
-                        ui.set_min_height(200.0);
-                        ScrollArea::vertical().id_source("tag_scroll_area").show(ui, |ui: &mut eframe::egui::Ui| {
-                            self.tag_grid(ui, ctx);
-                            self.create_tag(ui);
-                        });
-                    });
-                    
-                    ui.add_space(10.);
-
-                    let add_btn =
-                        ui.add(Button::new(RichText::new("Сохранить").color(COLOR_GREEN)));
-
-                    // let mut style = (*add_btn.ctx.style().clone()).clone();
-                    // style.spacing.item_spacing = egui::vec2(10.0, 20.0);
-                    // add_btn.ctx.set_style(style);
-
-                    if !add_btn.clicked() {
-                        return;
-                    }
-
-                    self.click_btn_add(ui)
-                });
+                        self.click_btn_save(ui)
+                    },
+                );
 
                 // TODO: переделать в ошибки для каждого поля
                 ui.colored_label(COLOR_RED, NoteAddFormFacade::btn_add_error_msg());

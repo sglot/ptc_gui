@@ -13,7 +13,7 @@ pub mod resource_list_form {
             resource_add_service::resource_add_service::ResourceAddService,
         },
         resource_list::resource_list_service::resource_list_service::ResourceListService,
-        settings::settings::{COLOR_BLUE, COLOR_RED, COLOR_WHITE, EDIT_FIELD_PADDING_BOTTOM, LIST_ROW_PADDING_BOTTOM, COLUMN_LEVEL_ONE_MARGIN, COLUMN_LEVEL_TWO_MARGIN, BG_COLOR_BUTTON, COLOR_GREEN, COLOR_BLACK},
+        settings::settings::{COLOR_BLUE, COLOR_RED, COLOR_WHITE, EDIT_FIELD_PADDING_BOTTOM, LIST_ROW_PADDING_BOTTOM, COLUMN_LEVEL_ONE_MARGIN, COLUMN_LEVEL_TWO_MARGIN, BG_COLOR_BUTTON},
         REGISTRY,
     };
 
@@ -132,7 +132,7 @@ pub mod resource_list_form {
             
         }
 
-        fn fields(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
+        fn fields(&self, ui: &mut eframe::egui::Ui, _ctx: &Context) {
             ui.with_layout(Layout::top_down(Align::LEFT), |ui| {
                 ui.with_layout(egui::Layout::top_down(egui::Align::LEFT), |ui| {
                     ui.set_max_width(200.);
@@ -155,7 +155,7 @@ pub mod resource_list_form {
                             .current_resource_name,
                     );
 
-                    if (!resource_field.changed()) {
+                    if !resource_field.changed() {
                         return;
                     }
 
@@ -175,7 +175,7 @@ pub mod resource_list_form {
                             .current_resource_login,
                     );
 
-                    if (!login_field.changed()) {
+                    if !login_field.changed() {
                         return;
                     }
 
@@ -201,7 +201,7 @@ pub mod resource_list_form {
                             .current_template_pass,
                     );
 
-                    if (!password_field.changed()) {
+                    if !password_field.changed() {
                         return;
                     }
 
@@ -327,7 +327,7 @@ pub mod resource_list_form {
             }
         }
 
-        fn click_save_btn(&self, ui: &mut eframe::egui::Ui) {
+        fn click_save_btn(&self, _ui: &mut eframe::egui::Ui) {
             // TODO: можно сделать общее поля для вывода ошибок:
             // показать пароль и сохранения изменений
             ResourcseAddFormFacade::set_decrypt_error_msg("".to_string());
@@ -355,9 +355,9 @@ pub mod resource_list_form {
                 .clone();
             let login = REGISTRY.lock().unwrap().auth_data.login.clone();
 
-            if (changed_resource_name.is_empty()
+            if changed_resource_name.is_empty()
                 || changed_template_pass.is_empty()
-                || changed_resource_login.is_empty())
+                || changed_resource_login.is_empty()
             {
                 ResourcseAddFormFacade::set_decrypt_error_msg(
                     "Нужно ввести ресурс, пароль, логин".to_string(),

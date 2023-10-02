@@ -2,7 +2,7 @@ pub mod footer_form {
     use eframe::egui::{ Context, Layout,};
 
     use crate::{
-        form::form::{Form},
+        form::form::Form,
         generate_password::form::generate_password_form::GeneratePasswordForm,
     };
 

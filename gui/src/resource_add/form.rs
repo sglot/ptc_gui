@@ -1,7 +1,7 @@
 pub mod resource_add_form {
-    use eframe::{egui::{self, Context, Button, WidgetText, RichText, TextEdit},};
+    use eframe::{egui::{self, Context, Button, RichText, TextEdit},};
 
-    use crate::{form::form::Form, resource_add::{resource_add_service::resource_add_service::ResourceAddService, resource_add_form_facade::resource_add_form_facade::ResourcseAddFormFacade}, REGISTRY, resource::resource::resource::Resource, settings::settings::{COLOR_WHITE, COLOR_RED, COLOR_GREEN}};
+    use crate::{form::form::Form, resource_add::{resource_add_service::resource_add_service::ResourceAddService, resource_add_form_facade::resource_add_form_facade::ResourcseAddFormFacade}, REGISTRY, resource::resource::resource::Resource, settings::settings::{COLOR_RED, COLOR_GREEN}};
 
     pub struct ResourceAddForm {
         resource_add_service: ResourceAddService
@@ -14,7 +14,7 @@ pub mod resource_add_form {
             }
         }
 
-        fn click_btn_add(&self, ui: &mut eframe::egui::Ui) {
+        fn click_btn_add(&self, _ui: &mut eframe::egui::Ui) {
             
             ResourcseAddFormFacade::set_add_error_msg("".to_string());
 
@@ -24,7 +24,7 @@ pub mod resource_add_form {
             let login = REGISTRY.lock().unwrap().auth_data.login.clone();
     
     
-            if (new_resource_name.is_empty() || new_template_pass.is_empty() || new_resource_login.is_empty()) {
+            if new_resource_name.is_empty() || new_template_pass.is_empty() || new_resource_login.is_empty() {
                 ResourcseAddFormFacade::set_add_error_msg("Нужно ввести ресурс, пароль, логин".to_string())
             }
     

@@ -29,8 +29,6 @@ use auth::form::form::AuthForm;
 use form::{form::FormName, main_form::main_form::GUI};
 use notebook::form::form::NotebookForm;
 use resource_list::form::resource_list_form::ResourceListForm;
-use tag::tag_repository_fs::tag_repository_fs::TagRepositoryFS;
-use tag::tag_repository::tag_repository::TagRepository;
 use std::sync::Mutex;
 use tracing_subscriber;
 
@@ -91,7 +89,7 @@ impl App for GUI {
     ) {
     }
 
-    fn update(&mut self, ctx: &eframe::egui::Context, frame: &eframe::epi::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &eframe::epi::Frame) {
         ctx.set_visuals(egui::Visuals::dark());
         self.render_top_panel(ctx);
         CentralPanel::default().show(ctx, |ui: &mut Ui| {

@@ -3,7 +3,7 @@ pub mod menu_form {
 
     use crate::{
         form::form::{Form, FormName},
-        registry::registry::Registry, settings::settings::{COLOR_RED, COLOR_YELLOW},
+        registry::registry::Registry, settings::settings::COLOR_YELLOW,
     };
 
     pub struct MenuForm {}

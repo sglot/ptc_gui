@@ -1,11 +1,9 @@
 pub mod generate_password_form {
-    use eframe::egui::{self, menu::SubMenu, Button, Context, Label, Layout, RichText, TextEdit};
+    use eframe::egui::{Button, Context, Label, Layout, RichText, TextEdit};
 
     use crate::{
-        form::form::{Form, FormName},
+        form::form::Form,
         generate_password::password_generator::password_generator::PasswordGenerator,
-        registry::registry::Registry,
-        settings::settings::COLOR_RED,
         REGISTRY,
     };
 
@@ -33,7 +31,7 @@ pub mod generate_password_form {
 
                     let make_pass_btn = ui.add(Button::new(RichText::new("Сгенерировать пароль")));
 
-                    if (make_pass_btn.clicked()) {
+                    if make_pass_btn.clicked() {
                         let count = REGISTRY
                         .lock()
                         .unwrap()

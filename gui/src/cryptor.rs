@@ -29,7 +29,7 @@ pub mod cryptor {
             let mc = new_magic_crypt!(&self.key, 256);
 
             match mc.decrypt_base64_to_string(data) {
-                Ok(res) => (Ok(res)),
+                Ok(res) => Ok(res),
                 Err(e) => Err(e.to_string()),
             }
         }

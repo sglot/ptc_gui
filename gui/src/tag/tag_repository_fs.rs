@@ -1,14 +1,13 @@
 pub mod tag_repository_fs {
-    use crate::config::config::Config;
+    // use crate::config::config::Config;
     use crate::registry::registry::Registry;
     use crate::support::fs::fs::DELIMITER;
     use crate::support::fs::maker::maker_fs::MakerFS;
     use crate::tag::tag_repository::tag_repository::TagRepository;
     use std::fs::{self, OpenOptions};
-    use std::io::empty;
 
     pub struct TagRepositoryFS {
-        config: Config,
+        // config: Config,
         maker: MakerFS,
     }
 
@@ -23,17 +22,7 @@ pub mod tag_repository_fs {
             use std::io::Write;
             tracing::error!("8");
             let mut path = String::from(path_to);
-            tracing::error!("10");
-            // let m = match fs::create_dir_all(&path) {
-            //     Ok(it) => it,
-            //     Err(err) => {
-            //         tracing::error!("{err:?}");
-            //         return Err("err".to_string())
-            //     },
-            // };
-            tracing::error!("9");
             path.push_str(storage_file_name);
-            tracing::error!("6");
             let mut file_ref = match OpenOptions::new().append(true).open(&path) {
                 Ok(file) => file,
                 Err(_) => match File::create(&path) {
@@ -103,7 +92,7 @@ pub mod tag_repository_fs {
 
                     let mut data = "".to_string();
                     for tag in &tags {
-                        if (!data.is_empty()) {
+                        if !data.is_empty() {
                             data.push_str("@,@")
                         };
                         data.push_str(&tag);
@@ -132,6 +121,20 @@ pub mod tag_repository_fs {
             }
 
         }
+
+        fn find(&self, tag: String) -> Result<String, String> {
+            let tags_res = self.get_list();
+
+            match tags_res {
+                Ok(tags_vec) => {
+                    match tags_vec.iter().find(| x| x.eq(&&tag)) {
+                        None => {tracing::error!("--------None"); Err(String::new())},
+                        Some(str) => {tracing::error!("--------str--"); Ok(str.clone())},
+                    }                  
+                },
+                Err(e) => return Err(e.to_string()),
+            }
+        }
     }
     impl TagRepositoryFS {
         pub fn new() -> TagRepositoryFS {
@@ -139,7 +142,7 @@ pub mod tag_repository_fs {
             let maker = MakerFS::new(config.clone());
 
             TagRepositoryFS {
-                config: config,
+                // config: config,
                 maker,
             }
         }

@@ -1,5 +1,5 @@
 pub mod resource_list_service {
-    use crate::{resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, self, resource::resource::Resource}, cryptor::cryptor::Cryptor, registry::registry::Registry, REGISTRY};
+    use crate::{resource::{resource_repository_fs::resource_repository_fs::ResourceRepositoryFS, resource_repository::resource_repository::ResourceRepository, resource::resource::Resource}, cryptor::cryptor::Cryptor, registry::registry::Registry, REGISTRY};
 
 
     pub struct ResourceListService {
@@ -19,7 +19,7 @@ pub mod resource_list_service {
             // 2. add res
 
             let changed_resource_list = REGISTRY.lock().unwrap().form_data.resource_list.typed_cache.resource_list();
-            if (!changed_resource_list.is_empty()) {
+            if !changed_resource_list.is_empty() {
                 return Ok(changed_resource_list)
             }
 

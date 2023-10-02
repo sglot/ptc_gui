@@ -1,16 +1,14 @@
 pub mod note_repository_fs {
-    use crate::config::config::Config;
+    // use crate::config::config::Config;
     use crate::note::note::note::Note;
     use crate::note::note_repository::note_repository::NoteRepository;
     use crate::registry::registry::Registry;
     use crate::support::fs::maker::maker_fs::MakerFS;
     use std::fs;
-    use std::io::empty;
-    use std::path::Path;
     use std::fs::OpenOptions;
 
     pub struct NoteRepositoryFS {
-        config: Config,
+        // config: Config,
         maker: MakerFS,
     }
 
@@ -46,6 +44,34 @@ pub mod note_repository_fs {
                 Err(e) => return Err(e.to_string()),
             }
         }
+
+        fn save_all_notes(&self, data_for_save: String, user: &str) -> Result<String, String> {
+            let path = self
+                .maker
+                .make_user_notebook_dir(user);
+
+            let year = self.maker.year();
+            let year_duplicate = self.maker.year() + "_duplicate";
+
+            let file_name_orig = path.clone() + &year;
+            let file_name_duplicate = path.clone() + &year_duplicate;
+            
+            let res: _ = match self.append_to_file(
+                        &path,
+                        &data_for_save,
+                        &year_duplicate,
+                    ) {
+                        Ok(res) => {
+                            //remove and rename
+                            fs::remove_file(&file_name_orig);
+                            fs::rename(file_name_duplicate, &file_name_orig);
+                            tracing::error!("000000000000000000k");
+                            Ok(res)
+                        },
+                        Err(e) => Err(e),
+                    };
+            res
+        }
     }
 
     impl NoteRepository for NoteRepositoryFS {
@@ -56,12 +82,12 @@ pub mod note_repository_fs {
                 .make_user_notebook_dir(&note.user());
 
             let mut data = serde_json::to_string(&note).unwrap();
-            data.push_str("@,@");
+            data.push_str(self.maker.delimiter());
 
             let res = match self.append_to_file(
                         &path,
                         &data,
-                        "2023",
+                        &self.maker.year(),
                     ) {
                         Ok(res) => Ok(res),
                         Err(e) => Err(e),
@@ -70,56 +96,59 @@ pub mod note_repository_fs {
             res
         }
 
-        // fn update(&self, resource: Resource) -> Result<String, String> {
-        //     let path = self
-        //         .maker
-        //         .make_template_dir(&resource.user_login(), &resource.name());
+        fn update(&self, note: Note) -> Result<String, String> {
+            let mut all_notes = self.get_list(&note.user).unwrap();
 
-        //     let res = match Path::new(&path).exists() {
-        //         false => Err(String::from("Ошибка, такого ресурса не существует")),
-        //         true => {
-        //             let cryptor = Cryptor { key: self.config.get_secret_key() };
+            let exist = match all_notes.iter().position(| x| x.id() == note.id()) {
+                None => {tracing::error!("id уже существует"); Err("id не существует".to_string())},
+                Some(position) => {
+                    all_notes.remove(position);
+                    all_notes.insert(position, note.clone());
+                    Ok(())
+                },
+            }; 
+            // tracing::error!("{all_notes:?}");
+            // std::process::exit(0);
+            if exist.is_err() {
+                exist.unwrap()
+            }
 
-        //             let template_password_crypted;
+            let mut data_for_save = "".to_string();
+            for note in all_notes {
+                data_for_save.push_str(&serde_json::to_string(&note).unwrap());
+                data_for_save.push_str(self.maker.delimiter());
+            }
 
-        //             // проверка на зашифрованный пароль, чтобы не перешифровать его ещё раз
-        //             match cryptor.decrypt(&resource.template_password()) {
-        //                 Ok(_) => template_password_crypted = resource.template_password(),
-        //                 Err(_) => template_password_crypted = cryptor.crypt(&resource.template_password()),
-        //             };
+            self.save_all_notes(data_for_save, &note.user())
+        }
 
-        //             let mut resource_data:Vec<String> = Vec::new();
-        //             resource_data.push(template_password_crypted);
-        //             resource_data.push(resource.resource_login());
-        //             // resource_data.push(resource.master_password());
+        fn delete(&self, note_id: u64, user: &str) -> Result<String, String> {
+            let mut all_notes = self.get_list(user).unwrap();
 
-        //             match self.save_to_file(
-        //                 &path,
-        //                 &resource_data.join(";"),
-        //                 self.config.get_template_file_name(),
-        //             ) {
-        //                 Ok(res) => Ok(res),
-        //                 Err(e) => Err(e),
-        //             }
-        //         }
-        //     };
+            let exist = match all_notes.iter().position(| x| x.id() == note_id) {
+                None => {tracing::error!("id уже существует"); Err("id не существует".to_string())},
+                Some(position) => {
+                    all_notes.remove(position);
+                    Ok(())
+                },
+            }; 
+            tracing::error!("/////////////////1111111");
+            // // tracing::error!("{note:?}");
+            // std::process::exit(0);
+            if exist.is_err() {
+                tracing::error!("/////////////////2222222");
+                exist.unwrap()
+            }
 
-        //     res
-        // }
+            tracing::error!("/////////////////3333333");
+            let mut data_for_save = "".to_string();
+            for note in all_notes {
+                data_for_save.push_str(&serde_json::to_string(&note).unwrap());
+                data_for_save.push_str(self.maker.delimiter());
+            }
 
-        // fn delete(&self, resource: Resource) -> Result<String, String> {
-        //     let path = self
-        //         .maker
-        //         .make_template_dir(&resource.user_login(), &resource.name());
-
-        //     match Path::new(&path).exists() {
-        //         true => match fs::remove_dir_all(&path) {
-        //             Ok(_) => Ok("Ресурс удалён".to_string()),
-        //             Err(e) => Err(e.to_string()),
-        //         },
-        //         false => Ok("Ресурс удалён".to_string()),
-        //     }
-        // }
+            self.save_all_notes(data_for_save, user)
+        }
 
         fn get_list(&self, login: &str) -> Result<Vec<Note>, String> {
             let notebook_path = self.maker.make_user_notebook_dir(login);
@@ -204,7 +233,7 @@ pub mod note_repository_fs {
             let maker = MakerFS::new(config.clone());
 
             NoteRepositoryFS {
-                config: config,
+                // config: config,
                 maker,
             }
         }

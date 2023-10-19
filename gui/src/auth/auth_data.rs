@@ -15,8 +15,8 @@ pub mod auth_data {
         pub fn new() -> Self {
             Self {
                 enter_type: Login::Login,
-                login: "t".to_string(),
-                pass: Mutex::new("t".to_string()),
+                login: "".to_string(),
+                pass: Mutex::new("".to_string()),
                 error_msg: Mutex::new("".to_string()),
                 is_auth: false,
             }

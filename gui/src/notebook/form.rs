@@ -13,7 +13,7 @@ pub mod form {
                 form::note_add_form::NoteAddForm,
                 note_add_form_facade::note_add_form_facade::NoteAddFormFacade,
             },
-            list::note_list_service::note_list_service::NoteListService,
+            list::note_list_service::note_list_service::NoteListService, report::form::note_report_form::NoteReportForm,
         },
         settings::settings::{COLOR_WHITE, COLOR_YELLOW, LIST_ROW_PADDING_BOTTOM},
         REGISTRY,
@@ -34,7 +34,9 @@ pub mod form {
 
         fn list(&self, ui: &mut eframe::egui::Ui, ctx: &Context) {
             ui.group(|ui| {
-                ui.heading("Заметки:");
+                ui.set_max_width(500.);
+                ui.set_min_height(600.);
+                ui.heading(RichText::new("Заметки:").color(egui::color::Color32::KHAKI));
                 ui.add_space(20.);
 
                 ScrollArea::vertical()
@@ -53,7 +55,6 @@ pub mod form {
                             }
                         };
                     });
-                ui.add_space(100.);
             });
         }
 
@@ -89,7 +90,7 @@ pub mod form {
 
                         ui.label(
                             RichText::new(note.title())
-                                .color(egui::Color32::from_rgb(177, 177, 177))
+                                .color(egui::Color32::from_rgb(177, 177,177))
                                 .strong(),
                         );
                     });
@@ -133,7 +134,7 @@ pub mod form {
                     if !note.text.is_empty() {
                         ui.horizontal(|ui| {
                             ui.set_min_width(300.);
-                            ui.style_mut().visuals.extreme_bg_color = egui::Color32::DARK_GRAY;
+                            ui.style_mut().visuals.extreme_bg_color = egui::Color32::from_rgb(47, 47, 47);
                             ui.style_mut().visuals.override_text_color =
                                 Option::Some(egui::Color32::WHITE);
                             ui.text_edit_multiline(&mut note.text());
@@ -215,6 +216,10 @@ pub mod form {
                                 self.list(ui, ctx);
                             },
                         );
+
+                        ui.add_space(20.);
+
+                        GUI::render(NoteReportForm::new(), ui, ctx);
                     });
                 },
             );

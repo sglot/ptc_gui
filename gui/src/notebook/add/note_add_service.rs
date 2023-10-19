@@ -33,6 +33,14 @@ pub mod note_add_service {
                             .note_list
                             .typed_cache
                             .drop_note_list();
+
+                            REGISTRY
+                            .lock()
+                            .unwrap()
+                            .form_data
+                            .note_summary
+                            .typed_cache
+                            .drop();
                         Ok(res)
                     }
                     Err(e) => Err(e),
@@ -50,6 +58,14 @@ pub mod note_add_service {
                             .note_list
                             .typed_cache
                             .drop_note_list();
+
+                            REGISTRY
+                            .lock()
+                            .unwrap()
+                            .form_data
+                            .note_summary
+                            .typed_cache
+                            .drop();
                         Ok(res)
                     }
                     Err(e) => Err(e),

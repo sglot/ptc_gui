@@ -1,9 +1,9 @@
 pub mod registry_repository {
     use crate::auth::auth_data::auth_data::AuthData;
-    use crate::auth::{auth::LastUser};
+    use crate::auth::auth::LastUser;
     use crate::form::form::FormData;
-    use crate::{config::config::Config};
-    use crate::{form::form::FormName};
+    use crate::config::config::Config;
+    use crate::form::form::FormName;
             
     pub struct RegistryRepository {
         pub auth_data: AuthData,

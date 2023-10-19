@@ -91,7 +91,9 @@ impl App for GUI {
 
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &eframe::epi::Frame) {
         ctx.set_visuals(egui::Visuals::dark());
+
         self.render_top_panel(ctx);
+
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             GUI::preset(ctx, ui);
 
@@ -106,9 +108,11 @@ impl App for GUI {
             }
             
             if Registry::eq_current_form(FormName::Notebook) {
-                ui.horizontal(|ui: &mut Ui| GUI::render(NotebookForm::new(), ui, ctx));
+                ui.with_layout(egui::Layout::left_to_right().with_cross_justify(true), |ui| GUI::render(NotebookForm::new(), ui, ctx));
+                // ui.horizontal(|ui: &mut Ui| GUI::render(NotebookForm::new(), ui, ctx));
             }
         });
+        
         self.render_bottom_panel(ctx);
     }
 
@@ -123,7 +127,7 @@ fn main() {
 
     let app = GUI::new();
     let mut win_options = NativeOptions::default();
-    win_options.initial_window_size = Some(Vec2::new(800., 580.));
+    win_options.initial_window_size = Some(Vec2::new(1800., 800.));
 
     run_native(Box::new(app), win_options);
 }

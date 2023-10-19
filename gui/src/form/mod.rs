@@ -3,7 +3,7 @@ pub mod main_form;
 pub mod form {
     use eframe::egui::Context;
 
-    use crate::{resource_add::resource_add_form_data::resource_add_form_data::ResourcseAddFormData, resource_list::resource_list_form_data::resource_list_form_data::ResourcseListFormData, generate_password::generate_password_form_data::generate_password_form_data::GeneratePasswordFormData, notebook::{list::note_list_form_data::note_list_form_data::NoteListFormData, add::note_add_form_data::note_add_form_data::NoteAddFormData}};
+    use crate::{resource_add::resource_add_form_data::resource_add_form_data::ResourcseAddFormData, resource_list::resource_list_form_data::resource_list_form_data::ResourcseListFormData, generate_password::generate_password_form_data::generate_password_form_data::GeneratePasswordFormData, notebook::{list::note_list_form_data::note_list_form_data::NoteListFormData, add::note_add_form_data::note_add_form_data::NoteAddFormData, report::note_summary_data::note_summary_data::NoteSummaryData}};
 
     #[derive(PartialEq)]
     pub enum FormName {
@@ -20,6 +20,7 @@ pub mod form {
         
         pub note_list: NoteListFormData,
         pub note_add: NoteAddFormData,
+        pub note_summary: NoteSummaryData,
     }
 
     impl FormData {
@@ -32,6 +33,7 @@ pub mod form {
 
                 note_list: NoteListFormData::new(),
                 note_add: NoteAddFormData::new(),
+                note_summary: NoteSummaryData::new(),
             }
         }
     }
